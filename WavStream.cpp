@@ -6,12 +6,21 @@
 DSY_SDRAM_BSS int16_t bigBuff[44100*60];
 
 //Table read
-float tableRead(float indexes, const size_t tableLength) {
+float tableRead(double index, const size_t tableLength) {
 
-    const float p = indexes;
-    const float q = floorf(p);
-    const float r = p - q;
-    return (1.0 - r) * s162f(bigBuff[(int)q]) + (r * s162f(bigBuff[(int)q + 1]));
+    const double p = index;
+    const double q = floorf(p);
+    const double r = p - q;
+
+    int nextIndex = q + 1;
+    if (nextIndex >= (int)tableLength) {
+        nextIndex = 0;
+    } else if (nextIndex < 0) {
+        nextIndex = (tableLength - 1);
+    }
+
+    //There is something to do about reading it wrong
+    return (1.0 - r) * s162f(bigBuff[(int)q]) + (r * s162f(bigBuff[nextIndex]));
 }
 
 using namespace daisy;
@@ -125,13 +134,21 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
-float WavStream::Stream(float speed)
+float WavStream::Stream(double speed)
 {
     //float samp = s162f(bigBuff[read_ptr_]);
     float sample = tableRead(read_ptr_, fileSize);
-    read_ptr_++;
-    if (read_ptr_ >= fileSize) {
-        read_ptr_ = 0;
+    read_ptr_ += speed;
+
+    if (speed > 0) {
+        if (read_ptr_ >= fileSize) {
+            read_ptr_ = read_ptr_ - trunc(read_ptr_);
+        }
+    } else {
+        if (read_ptr_ < 0) {
+            read_ptr_ += (fileSize - 1);
+        }
     }
+    
     return sample;
 }

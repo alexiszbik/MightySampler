@@ -18,16 +18,20 @@ DaisyPod     hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
 
+Parameter p_knob1, p_knob2;
+
+double speed = 1.0;
+
 void AudioCallback(float *in, float *out, size_t size)
 {
     for(size_t i = 0; i < size; i += 2)
     {
         if (sampler.GetChannelCount()== 1) {
-            out[i] = sampler.Stream() * 0.5f;
+            out[i] = sampler.Stream(speed) * 0.5f;
             out[i + 1] = out[i];
         } else {
-            out[i] = sampler.Stream() * 0.5f;
-            out[i + 1] = sampler.Stream() * 0.5f;
+            out[i] = sampler.Stream(speed) * 0.5f;
+            out[i + 1] = sampler.Stream(speed) * 0.5f;
         }
     }
 }
@@ -44,10 +48,10 @@ int main(void)
     sdcard.Init(sd_cfg);
     sampler.Init();
 
-    // SET LED to indicate Looping status.
-    //hw.SetLed(DaisyPatch::LED_2_B, sampler.GetLooping());
+    p_knob1.Init(hw.knob1, 0, 1, Parameter::LINEAR);
+    p_knob2.Init(hw.knob2, 0, 1, Parameter::LINEAR);
 
-    hw.led1.Set(1, 0, 0);
+    hw.StartAdc();
 
     // Init Audio
     hw.SetAudioBlockSize(blocksize);
@@ -60,25 +64,39 @@ int main(void)
 
         hw.ProcessDigitalControls();
 
+        speed = (p_knob1.Process() - 0.5) * 4.0;
+        //speed = p_knob1.Process();
+
         // Change file with encoder.
         int inc = hw.encoder.Increment();
         if(inc > 0)
         {
+            hw.StopAudio();
+            hw.DelayMs(100);
+            
             size_t curfile;
             curfile = sampler.GetCurrentFile();
             if(curfile < sampler.GetNumberFiles() - 1)
             {
                 sampler.Open(curfile + 1);
             }
+            hw.DelayMs(100);
+            hw.StartAudio(AudioCallback);
         }
         else if(inc < 0)
         {
+            hw.StopAudio();
+            hw.DelayMs(100);
+
             size_t curfile;
             curfile = sampler.GetCurrentFile();
             if(curfile > 0)
             {
                 sampler.Open(curfile - 1);
             }
+
+            hw.DelayMs(100);
+            hw.StartAudio(AudioCallback);
         }
     }
 }

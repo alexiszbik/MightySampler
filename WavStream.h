@@ -55,7 +55,7 @@ class WavStream
     int Close();
 
     /** \return The next sample if playing, otherwise returns 0 */
-    float Stream(float speed = 1);
+    float Stream(double speed = 1);
 
     /** \return The number of files loaded by the WavStream */
     inline size_t GetNumberFiles() const { return file_cnt_; }
@@ -81,7 +81,7 @@ class WavStream
     size_t                  file_cnt_, file_sel_;
     BufferState             buff_state_;
     int16_t                 buff_[kBufferSize];
-    size_t                  read_ptr_;
+    double                  read_ptr_;
     bool                    looping_, playing_;
     size_t fileSize = 0;
 
