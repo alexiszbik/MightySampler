@@ -5,24 +5,6 @@
 
 DSY_SDRAM_BSS int16_t bigBuff[44100*60];
 
-//Table read
-float tableRead(double index, const size_t tableLength) {
-
-    const double p = index;
-    const double q = floorf(p);
-    const double r = p - q;
-
-    int nextIndex = q + 1;
-    if (nextIndex >= (int)tableLength) {
-        nextIndex = 0;
-    } else if (nextIndex < 0) {
-        nextIndex = (tableLength - 1);
-    }
-
-    //There is something to do about reading it wrong
-    return (1.0 - r) * s162f(bigBuff[(int)q]) + (r * s162f(bigBuff[nextIndex]));
-}
-
 using namespace daisy;
 
 void WavStream::Init()
@@ -93,8 +75,7 @@ void WavStream::Init()
             f_close(&SDFile);
         }
     }
-    // fill buffer with first file preemptively.
-    buff_state_ = BUFFER_STATE_PREPARE_0;
+
     Open(0);
     read_ptr_ = 0;
 }
@@ -126,6 +107,8 @@ int WavStream::Open(size_t sel)
         fileSize += bytesread / 2;
     }
 
+    fileSize = fileSize / GetChannelCount();
+
     return 0;
 }
 
@@ -134,10 +117,34 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
-float WavStream::Stream(double speed)
+//Table read
+void WavStream::TableRead(double index, const size_t tableLength) {
+
+    const double p = index;
+    const double q = floorf(p);
+    const double r = p - q;
+
+    int nextIndex = q + 1;
+    if (nextIndex >= (int)tableLength) {
+        nextIndex = 0;
+    } else if (nextIndex < 0) {
+        nextIndex = (tableLength - 1);
+    }
+
+    size_t chanCount = GetChannelCount();
+    //There is something to do about reading it wrong
+    for (size_t channel = 0; channel < chanCount; channel++) {
+        data[channel] = (1.0 - r) * s162f(bigBuff[((int)q) * chanCount + channel]) + (r * s162f(bigBuff[nextIndex * chanCount + channel]));
+    }
+    
+    
+}
+
+
+void WavStream::Stream(double speed)
 {
-    //float samp = s162f(bigBuff[read_ptr_]);
-    float sample = tableRead(read_ptr_, fileSize);
+    TableRead(read_ptr_, fileSize);
+
     read_ptr_ += speed;
 
     if (speed > 0) {
@@ -149,6 +156,4 @@ float WavStream::Stream(double speed)
             read_ptr_ += (fileSize - 1);
         }
     }
-    
-    return sample;
 }

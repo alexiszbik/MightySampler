@@ -26,12 +26,14 @@ void AudioCallback(float *in, float *out, size_t size)
 {
     for(size_t i = 0; i < size; i += 2)
     {
+        sampler.Stream(speed);
+
         if (sampler.GetChannelCount()== 1) {
-            out[i] = sampler.Stream(speed) * 0.5f;
+            out[i] = sampler.data[0] * 0.5f;
             out[i + 1] = out[i];
         } else {
-            out[i] = sampler.Stream(speed) * 0.5f;
-            out[i + 1] = sampler.Stream(speed) * 0.5f;
+            out[i] = sampler.data[0] * 0.5f;
+            out[i + 1] = sampler.data[1] * 0.5f;
         }
     }
 }
@@ -73,7 +75,7 @@ int main(void)
         {
             hw.StopAudio();
             hw.DelayMs(100);
-            
+
             size_t curfile;
             curfile = sampler.GetCurrentFile();
             if(curfile < sampler.GetNumberFiles() - 1)

@@ -55,7 +55,7 @@ class WavStream
     int Close();
 
     /** \return The next sample if playing, otherwise returns 0 */
-    float Stream(double speed = 1);
+    void Stream(double speed = 1);
 
     /** \return The number of files loaded by the WavStream */
     inline size_t GetNumberFiles() const { return file_cnt_; }
@@ -63,23 +63,18 @@ class WavStream
     /** \return currently selected file.*/
     inline size_t GetCurrentFile() const { return file_sel_; }
 
-    size_t GetChannelCount(); 
+    size_t GetChannelCount();
+
+    float data[2];
 
   private:
-    enum BufferState
-    {
-        BUFFER_STATE_IDLE,
-        BUFFER_STATE_PREPARE_0,
-        BUFFER_STATE_PREPARE_1,
-    };
 
-    BufferState GetNextBuffState();
+    void TableRead(double index, const size_t tableLength);
 
     static constexpr size_t kMaxFiles   = 8;
     static constexpr size_t kBufferSize = 512;
-    FileInfo             file_info_[kMaxFiles];
+    FileInfo                file_info_[kMaxFiles];
     size_t                  file_cnt_, file_sel_;
-    BufferState             buff_state_;
     int16_t                 buff_[kBufferSize];
     double                  read_ptr_;
     bool                    looping_, playing_;
