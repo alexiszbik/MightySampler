@@ -75,7 +75,6 @@ void WavStream::Init()
     }
 
     Open(0);
-    readPos = 0;
 }
 
 size_t WavStream::GetChannelCount() {
@@ -107,6 +106,11 @@ int WavStream::Open(size_t sel)
 
     fileSize = fileSize / GetChannelCount();
 
+    sample[sel].sampleData = &bigBuff[0];
+    sample[sel].sampleSize = fileSize;
+    sample[sel].chanCount = GetChannelCount();
+    sample[sel].Reset();
+
     return 0;
 }
 
@@ -115,41 +119,9 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
-//Table read
-void WavStream::TableRead(double index, const size_t tableLength) {
-
-    const double p = index;
-    const double q = floorf(p);
-    const double r = p - q;
-
-    int nextIndex = q + 1;
-    if (nextIndex >= (int)tableLength) {
-        nextIndex = 0;
-    } else if (nextIndex < 0) {
-        nextIndex = (tableLength - 1);
-    }
-
-    size_t chanCount = GetChannelCount();
-    //There is something to do about reading it wrong
-    for (size_t channel = 0; channel < chanCount; channel++) {
-        data[channel] = (1.0 - r) * s162f(bigBuff[((int)q) * chanCount + channel]) + (r * s162f(bigBuff[nextIndex * chanCount + channel]));
-    }
-}
-
-
 void WavStream::Stream(double speed)
 {
-    TableRead(readPos, fileSize);
-
-    readPos += speed;
-
-    if (speed > 0) {
-        if (readPos >= fileSize) {
-            readPos = readPos - trunc(readPos);
-        }
-    } else {
-        if (readPos < 0) {
-            readPos += (fileSize - 1);
-        }
-    }
+    sample[file_sel_].Stream(speed);
+    data[0] = sample[file_sel_].data[0];
+    data[1] = sample[file_sel_].data[1];
 }

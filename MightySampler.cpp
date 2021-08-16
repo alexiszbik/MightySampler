@@ -19,6 +19,8 @@ SdmmcHandler sdcard;
 WavStream    sampler;
 
 Parameter p_knob1, p_knob2;
+bool led1Status = false;
+bool led2Status = false;
 
 double speed = 1.0;
 
@@ -61,15 +63,24 @@ int main(void)
     // Loop forever...
     for(;;)
     {
-        // Prepare buffers for sampler as needed
-        //sampler.Prepare();
-
         hw.ProcessDigitalControls();
 
+        if (hw.button1.RisingEdge()) {
+            led1Status = !led1Status;
+        }
+        if (hw.button2.RisingEdge()) {
+            led2Status = !led2Status;
+        }
+
+        hw.led1.Set(led1Status ? 1 : 0, 0, 0);
+        hw.led2.Set(led2Status ? 1 : 0, 0, 0);
+        hw.UpdateLeds();
+
+        // this is temp
         speed = (p_knob1.Process() - 0.5) * 4.0;
-        //speed = p_knob1.Process();
 
         // Change file with encoder.
+        // this is temp
         int inc = hw.encoder.Increment();
         if(inc > 0)
         {
