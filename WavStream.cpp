@@ -16,9 +16,7 @@ void WavStream::Init()
     DIR     dir;
     char *  fn;
     file_sel_ = 0;
-    file_cnt_ = 0;
-    playing_  = true;
-    looping_  = false;
+    sampleCount = 0;
     // Init Fatfs
     dsy_fatfs_init();
     // Mount SD Card
@@ -39,12 +37,12 @@ void WavStream::Init()
             continue;
         // Now we'll check if its .wav and add to the list.
         fn = fno.fname;
-        if(file_cnt_ < kMaxFiles - 1)
+        if(sampleCount < kMaxFiles - 1)
         {
             if(strstr(fn, ".wav") || strstr(fn, ".WAV"))
             {
-                strcpy(file_info_[file_cnt_].name, fn);
-                file_cnt_++;
+                strcpy(sample[sampleCount].fileInfo.name, fn);
+                sampleCount++;
                 // For now lets break anyway to test.
                 //                break;
             }
@@ -56,15 +54,15 @@ void WavStream::Init()
     } while(result == FR_OK);
     f_closedir(&dir);
     // Now we'll go through each file and load the WavInfo.
-    for(size_t i = 0; i < file_cnt_; i++)
+    for(size_t i = 0; i < sampleCount; i++)
     {
         size_t bytesread;
-        if(f_open(&SDFile, file_info_[i].name, (FA_OPEN_EXISTING | FA_READ))
+        if(f_open(&SDFile, sample[i].fileInfo.name, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
             // Populate the WAV Info
             if(f_read(&SDFile,
-                      (void *)&file_info_[i].raw_data,
+                      (void *)&sample[i].fileInfo.raw_data,
                       sizeof(WAV_FormatTypeDef),
                       &bytesread)
                != FR_OK)
@@ -77,11 +75,11 @@ void WavStream::Init()
     }
 
     Open(0);
-    read_ptr_ = 0;
+    readPos = 0;
 }
 
 size_t WavStream::GetChannelCount() {
-    return file_info_[file_sel_].raw_data.NbrChannels;
+    return sample[file_sel_].fileInfo.raw_data.NbrChannels;
 }
 
 int WavStream::Open(size_t sel)
@@ -89,20 +87,20 @@ int WavStream::Open(size_t sel)
     if(sel != file_sel_)
     {
         f_close(&SDFile);
-        file_sel_ = sel < file_cnt_ ? sel : file_cnt_ - 1;
+        file_sel_ = sel < sampleCount ? sel : sampleCount - 1;
     }
     // Set Buffer Position
-    f_open(&SDFile, file_info_[file_sel_].name, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, sample[file_sel_].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
     f_lseek(&SDFile,
             sizeof(WAV_FormatTypeDef)
-                + file_info_[file_sel_].raw_data.SubChunk1Size);
+                + sample[file_sel_].fileInfo.raw_data.SubChunk1Size);
 
     UINT bytesread = 0;
     fileSize = 0;
 
     while(f_eof(&SDFile) == 0) {
-        UINT sizeToRead = 44100 * 2 * sizeof(buff_[0]);
+        UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);
         f_read(&SDFile, &bigBuff[fileSize], sizeToRead, &bytesread);
         fileSize += bytesread / 2;
     }
@@ -136,24 +134,22 @@ void WavStream::TableRead(double index, const size_t tableLength) {
     for (size_t channel = 0; channel < chanCount; channel++) {
         data[channel] = (1.0 - r) * s162f(bigBuff[((int)q) * chanCount + channel]) + (r * s162f(bigBuff[nextIndex * chanCount + channel]));
     }
-    
-    
 }
 
 
 void WavStream::Stream(double speed)
 {
-    TableRead(read_ptr_, fileSize);
+    TableRead(readPos, fileSize);
 
-    read_ptr_ += speed;
+    readPos += speed;
 
     if (speed > 0) {
-        if (read_ptr_ >= fileSize) {
-            read_ptr_ = read_ptr_ - trunc(read_ptr_);
+        if (readPos >= fileSize) {
+            readPos = readPos - trunc(readPos);
         }
     } else {
-        if (read_ptr_ < 0) {
-            read_ptr_ += (fileSize - 1);
+        if (readPos < 0) {
+            readPos += (fileSize - 1);
         }
     }
 }

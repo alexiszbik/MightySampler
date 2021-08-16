@@ -26,6 +26,13 @@ struct FileInfo
     char              name[WAV_FILENAME_MAX]; /**< Wav filename */
 };
 
+class Sample
+{
+  public:
+  FileInfo  fileInfo;
+
+};
+
 /* 
 TODO:
 - Make template-y to reduce memory usage.
@@ -58,7 +65,7 @@ class WavStream
     void Stream(double speed = 1);
 
     /** \return The number of files loaded by the WavStream */
-    inline size_t GetNumberFiles() const { return file_cnt_; }
+    inline size_t GetNumberFiles() const { return sampleCount; }
 
     /** \return currently selected file.*/
     inline size_t GetCurrentFile() const { return file_sel_; }
@@ -72,12 +79,9 @@ class WavStream
     void TableRead(double index, const size_t tableLength);
 
     static constexpr size_t kMaxFiles   = 8;
-    static constexpr size_t kBufferSize = 512;
-    FileInfo                file_info_[kMaxFiles];
-    size_t                  file_cnt_, file_sel_;
-    int16_t                 buff_[kBufferSize];
-    double                  read_ptr_;
-    bool                    looping_, playing_;
+    Sample                  sample[kMaxFiles];
+    size_t                  sampleCount, file_sel_;
+    double                  readPos;
     size_t fileSize = 0;
 
 };
