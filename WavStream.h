@@ -20,7 +20,7 @@ double-buffering. */
 class WavStream
 {
   public:
-    WavStream() {}
+    WavStream();
     ~WavStream() {}
 
     /** Initializes the WavStream, loading up to max_files of wav files from an SD Card. */
@@ -38,20 +38,21 @@ class WavStream
 
     /** \return The next sample if playing, otherwise returns 0 */
     void Stream(double speed = 1);
-
-    /** \return The number of files loaded by the WavStream */
+    
     inline size_t GetNumberFiles() const { return sampleCount; }
-
-    /** \return currently selected file.*/
     inline size_t GetCurrentFile() const { return file_sel_; }
+
+    void Trigger(size_t sampleId, bool state);
 
     size_t GetChannelCount();
 
-    float data[2];
-
-  private:
+    void CheckPlaying();
 
     static constexpr size_t kMaxFiles   = 8;
+    float data[2];
+    bool isPlaying[kMaxFiles];
+
+  private:
     Sample                  sample[kMaxFiles];
 
     size_t                  sampleCount, file_sel_;

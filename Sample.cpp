@@ -2,7 +2,15 @@
 #include "daisy.h"
 
 void Sample::Reset() {
+    isPlaying = false;
     readPos = 0;
+}
+
+void Sample::Trigger(bool state) {
+    isPlaying = !isPlaying;
+    if (isPlaying) {
+        readPos = 0;
+    }
 }
 
 //Table read
@@ -27,17 +35,32 @@ void Sample::TableRead(double index, const size_t tableLength) {
 
 void Sample::Stream(double speed)
 {
-    TableRead(readPos, sampleSize);
-
-    readPos += speed;
-
-    if (speed > 0) {
-        if (readPos >= sampleSize) {
-            readPos = readPos - trunc(readPos);
-        }
+    if (!isPlaying) {
+        data[0] = 0;
+        data[1] = 0;
+        
     } else {
-        if (readPos < 0) {
-            readPos += (sampleSize - 1);
+
+        TableRead(readPos, sampleSize);
+
+        readPos += speed;
+
+        if (speed > 0) {
+            if (readPos >= sampleSize) {
+                if (isLooping) {
+                    readPos = readPos - trunc(readPos);
+                } else {
+                    Reset();
+                }
+            }
+        } else {
+            if (readPos < 0) {
+                if (isLooping) {
+                    readPos += (sampleSize - 1);
+                } else {
+                    Reset();
+                }
+            }
         }
     }
 }

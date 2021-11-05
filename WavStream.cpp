@@ -1,11 +1,18 @@
 #include <string.h>
 #include "WavStream.h"
-#include "fatfs.h"
 #include "daisy.h"
+
+//#include "oled_display.h"
 
 DSY_SDRAM_BSS int16_t bigBuff[44100*60];
 
 using namespace daisy;
+
+WavStream::WavStream() {
+    for (size_t i = 0; i < kMaxFiles; i++) {
+        isPlaying[i] = false;
+    }
+}
 
 void WavStream::Init()
 {
@@ -119,9 +126,19 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
+void WavStream::Trigger(size_t sampleId, bool state) {
+    sample[sampleId].Trigger(state);
+}
+
 void WavStream::Stream(double speed)
 {
     sample[file_sel_].Stream(speed);
     data[0] = sample[file_sel_].data[0];
     data[1] = sample[file_sel_].data[1];
+}
+
+void WavStream::CheckPlaying() {
+    for (size_t i = 0; i < kMaxFiles; i++) {
+        isPlaying[i] = sample[i].IsPlaying();
+    }
 }

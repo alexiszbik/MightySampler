@@ -16,7 +16,6 @@ struct FileInfo
 {
     WAV_FormatTypeDef raw_data;               /**< Raw wav data */
     char              name[WAV_FILENAME_MAX]; /**< Wav filename */
-
 };
 
 class Sample
@@ -24,7 +23,10 @@ class Sample
 public:
     void Stream(double speed);
     void Reset();
-    
+
+    void Trigger(bool state);
+    bool IsPlaying() { return isPlaying; }
+
 private:
     void TableRead(double index, const size_t tableLength);
 
@@ -38,7 +40,10 @@ public:
 
     float data[2] = {0,0};
 
+private:
     double readPos = 0;
+    bool isPlaying = true;
+    bool isLooping = true;
 
 };
 
