@@ -7,6 +7,8 @@
 //
 #include <stdio.h>
 #include <string.h>
+#include <vector>
+
 #include "./WavStream.h"
 #include "daisy_pod.h"
 #include "dev/oled_ssd130x.h"
@@ -16,20 +18,43 @@ using MyOledDisplay = OledDisplay<SSD130xI2c128x64Driver>;
 
 using namespace daisy;
 
-#define BUTTON_PIN 22
+#define BUTTON_PIN_A 21
+#define BUTTON_PIN_B 22
+#define BUTTON_PIN_C 23
+#define BUTTON_PIN_D 24
+#define BUTTON_PIN_E 25
+#define BUTTON_PIN_F 26
 
-//DaisyPatch   hw;
-DaisySeed     hw;
+#define LED_PIN_A 27
+#define LED_PIN_B 28
+#define LED_PIN_C 29
+#define LED_PIN_D 30
+#define LED_PIN_E 7
+#define LED_PIN_F 8
+
+DaisySeed    hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
 
 MyOledDisplay display;
 MidiUartHandler midi;
 
+std::vector<Switch*> buttons;
+std::vector<dsy_gpio*> leds;
+
 double speed = 1.0;
 
 void AudioCallback(const float *in, float *out, size_t size)
 {
+    int iterator = 0;
+    for (auto button : buttons) {
+        button->Debounce();
+        bool state = button->Pressed();
+
+        dsy_gpio_write(leds.at(iterator), state);
+        iterator++;
+    }
+
     for(size_t i = 0; i < size; i += 2)
     {
         sampler.Stream(speed);
@@ -46,14 +71,8 @@ void AudioCallback(const float *in, float *out, size_t size)
 
 char strbuff[128];
 
-// Typical Switch case for Message Type.
 void HandleMidiMessage(MidiEvent m)
 {
-
-    //sprintf(strbuff, "midi");
-    
-
-    
     switch(m.type)
     {
         case NoteOn:
@@ -94,6 +113,30 @@ void displayWrite(const char* message) {
 
 }
 
+void InitButtons() {
+
+    int updateRate = 1000;
+    //Initialize the button on pin 28
+    for (int pin : {BUTTON_PIN_A, BUTTON_PIN_B, BUTTON_PIN_C, BUTTON_PIN_D, BUTTON_PIN_E, BUTTON_PIN_F}) {
+        auto button = new Switch();
+        button->Init(hw.GetPin(pin), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_INVERTED, Switch::PULL_UP);
+        buttons.push_back(button);
+    }
+    
+}
+
+void InitLeds() {
+    for (int pin : {LED_PIN_A, LED_PIN_B, LED_PIN_C, LED_PIN_D, LED_PIN_E, LED_PIN_F}) {
+        auto led = new dsy_gpio();
+        led->pin  = hw.GetPin(pin);
+        led->mode = DSY_GPIO_MODE_OUTPUT_PP;
+        led->pull = DSY_GPIO_NOPULL;
+        dsy_gpio_init(led);
+        leds.push_back(led);
+
+    }
+}
+
 void InitMidi()
 {
     MidiUartHandler::Config midi_config;
@@ -118,8 +161,6 @@ int main(void)
     /** And Initialize */
     display.Init(disp_cfg);
 
-    displayWrite("pre");
-
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
@@ -130,6 +171,9 @@ int main(void)
     const char* init = sampler.Init();
 
     displayWrite(init);
+
+    InitButtons();
+    InitLeds();
 
     // Init Audio
     hw.SetAudioBlockSize(blocksize);
