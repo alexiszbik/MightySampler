@@ -51,6 +51,10 @@ void AudioCallback(const float *in, float *out, size_t size)
         button->Debounce();
         bool state = button->Pressed();
 
+        if (iterator == 0) {
+            sampler.sample[0].SetIsPlaying(state);
+        }
+
         dsy_gpio_write(leds.at(iterator), state);
         iterator++;
     }
@@ -133,7 +137,6 @@ void InitLeds() {
         led->pull = DSY_GPIO_NOPULL;
         dsy_gpio_init(led);
         leds.push_back(led);
-
     }
 }
 
@@ -142,8 +145,6 @@ void InitMidi()
     MidiUartHandler::Config midi_config;
     midi.Init(midi_config);
 }
-
-
 
 int main(void)
 {
@@ -167,10 +168,11 @@ int main(void)
     sd_cfg.speed = SdmmcHandler::Speed::SLOW;
     sdcard.Init(sd_cfg);
 
-    displayWrite("sd config");
-    const char* init = sampler.Init();
+    displayWrite("Loading SD ...");
+    
+    sampler.Init();
 
-    displayWrite(init);
+    displayWrite("OK");
 
     InitButtons();
     InitLeds();
@@ -181,8 +183,6 @@ int main(void)
 
     InitMidi();
     midi.StartReceive();
-    
-    sampler.Trigger(0, true);
 
     // Loop forever...
     for(;;)
@@ -195,7 +195,7 @@ int main(void)
             HandleMidiMessage(midi.PopEvent());
         }
 
-        sampler.CheckPlaying();
+        //sampler.CheckPlaying();
 
         // this is temp
         //speed = (p_knob1.Process() - 0.5) * 4.0;

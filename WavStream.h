@@ -24,7 +24,7 @@ class WavStream
     ~WavStream() {}
 
     /** Initializes the WavStream, loading up to max_files of wav files from an SD Card. */
-    const char* Init();
+    void Init();
 
     /** Opens the file at index sel for reading.
     \param sel File to open
@@ -42,19 +42,14 @@ class WavStream
     inline size_t GetNumberFiles() const { return sampleCount; }
     inline size_t GetCurrentFile() const { return file_sel_; }
 
-    void Trigger(size_t sampleId, bool state);
-
     size_t GetChannelCount();
-
-    void CheckPlaying();
 
     static constexpr size_t kMaxFiles   = 8;
     float data[2];
-    bool isPlaying[kMaxFiles];
 
-  private:
     Sample                  sample[kMaxFiles];
 
+  private:
     size_t                  sampleCount, file_sel_;
     
     size_t                  fileSize = 0;

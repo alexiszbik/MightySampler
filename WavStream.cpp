@@ -4,17 +4,14 @@
 
 //#include "oled_display.h"
 
-DSY_SDRAM_BSS int16_t bigBuff[44100*60];
+DSY_SDRAM_BSS int16_t bigBuff[44100*120];
 
 using namespace daisy;
 
 WavStream::WavStream() {
-    for (size_t i = 0; i < kMaxFiles; i++) {
-        isPlaying[i] = false;
-    }
 }
 
-const char* WavStream::Init()
+void WavStream::Init()
 {
     // First check for all .wav files, and add them to the list until its full or there are no more.
     // Only checks '/'
@@ -27,7 +24,6 @@ const char* WavStream::Init()
     // Init Fatfs
     dsy_fatfs_init();
     // Mount SD Card
-
    
     f_mount(&SDFatFS, SDPath, 1);
 
@@ -35,7 +31,7 @@ const char* WavStream::Init()
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
     {
-        return "no files";
+        return;
     }
     do
     {
@@ -64,6 +60,7 @@ const char* WavStream::Init()
         }
     } while(result == FR_OK);
     f_closedir(&dir);
+    
     // Now we'll go through each file and load the WavInfo.
     for(size_t i = 0; i < sampleCount; i++)
     {
@@ -79,15 +76,13 @@ const char* WavStream::Init()
                != FR_OK)
             {
                 // Maybe add return type
-                return "can't read";
+                return;
             }
             f_close(&SDFile);
         }
     }
 
     Open(0);
-
-    return "pas de pb";
 }
 
 size_t WavStream::GetChannelCount() {
@@ -132,19 +127,9 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
-void WavStream::Trigger(size_t sampleId, bool state) {
-    sample[sampleId].Trigger(state);
-}
-
 void WavStream::Stream(double speed)
 {
     sample[file_sel_].Stream(speed);
     data[0] = sample[file_sel_].data[0];
     data[1] = sample[file_sel_].data[1];
-}
-
-void WavStream::CheckPlaying() {
-    for (size_t i = 0; i < kMaxFiles; i++) {
-        isPlaying[i] = sample[i].IsPlaying();
-    }
 }

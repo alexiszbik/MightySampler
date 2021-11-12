@@ -24,7 +24,7 @@ public:
     void Stream(double speed);
     void Reset();
 
-    void Trigger(bool state);
+    void SetIsPlaying(bool state);
     bool IsPlaying() { return isPlaying; }
 
 private:
@@ -42,7 +42,7 @@ public:
 
 private:
     double readPos = 0;
-    bool isPlaying = true;
+    bool isPlaying = false;
     bool isLooping = true;
 
 };

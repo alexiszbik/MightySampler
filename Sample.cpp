@@ -6,11 +6,11 @@ void Sample::Reset() {
     readPos = 0;
 }
 
-void Sample::Trigger(bool state) {
-    isPlaying = !isPlaying;
-    if (isPlaying) {
+void Sample::SetIsPlaying(bool state) {
+    if (state && !isPlaying) {
         readPos = 0;
     }
+    isPlaying = state;
 }
 
 //Table read
