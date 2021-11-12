@@ -14,7 +14,7 @@ WavStream::WavStream() {
     }
 }
 
-void WavStream::Init()
+const char* WavStream::Init()
 {
     // First check for all .wav files, and add them to the list until its full or there are no more.
     // Only checks '/'
@@ -27,11 +27,15 @@ void WavStream::Init()
     // Init Fatfs
     dsy_fatfs_init();
     // Mount SD Card
+
+   
     f_mount(&SDFatFS, SDPath, 1);
+
+    //return "post fmount";
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
     {
-        return;
+        return "no files";
     }
     do
     {
@@ -75,13 +79,15 @@ void WavStream::Init()
                != FR_OK)
             {
                 // Maybe add return type
-                return;
+                return "can't read";
             }
             f_close(&SDFile);
         }
     }
 
     Open(0);
+
+    return "pas de pb";
 }
 
 size_t WavStream::GetChannelCount() {

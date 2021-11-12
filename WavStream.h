@@ -24,7 +24,7 @@ class WavStream
     ~WavStream() {}
 
     /** Initializes the WavStream, loading up to max_files of wav files from an SD Card. */
-    void Init();
+    const char* Init();
 
     /** Opens the file at index sel for reading.
     \param sel File to open

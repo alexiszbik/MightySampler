@@ -19,17 +19,12 @@ using namespace daisy;
 #define BUTTON_PIN 22
 
 //DaisyPatch   hw;
-DaisyPod     hw;
+DaisySeed     hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
 
-Switch button;
-
 MyOledDisplay display;
-
-Parameter p_knob1, p_knob2;
-bool led1Status = false;
-bool led2Status = false;
+MidiUartHandler midi;
 
 double speed = 1.0;
 
@@ -91,90 +86,79 @@ void HandleMidiMessage(MidiEvent m)
     display.Update();
 }
 
+void displayWrite(const char* message) {
+    display.Fill(false);
+    display.SetCursor(0, 0);
+    display.WriteString(message, Font_11x18, true);
+    display.Update();
+
+}
+
+void InitMidi()
+{
+    MidiUartHandler::Config midi_config;
+    midi.Init(midi_config);
+}
+
+
 
 int main(void)
 {
     // Init hardware
     size_t blocksize = 48;
+    hw.Configure();
     hw.Init();
-    
 
     /** Configure the Display */
     MyOledDisplay::Config disp_cfg;
-
     disp_cfg.driver_config.transport_config.Defaults();
-
-    disp_cfg.driver_config.transport_config.i2c_config.pin_config.scl = hw.seed.GetPin(11);
-    disp_cfg.driver_config.transport_config.i2c_config.pin_config.sda = hw.seed.GetPin(12);
-
+    disp_cfg.driver_config.transport_config.i2c_config.pin_config.scl = hw.GetPin(11);
+    disp_cfg.driver_config.transport_config.i2c_config.pin_config.sda = hw.GetPin(12);
     
     /** And Initialize */
     display.Init(disp_cfg);
 
+    displayWrite("pre");
+
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
+    sd_cfg.speed = SdmmcHandler::Speed::SLOW;
     sdcard.Init(sd_cfg);
-    sampler.Init();
 
-    p_knob1.Init(hw.knob1, 0, 1, Parameter::LINEAR);
-    p_knob2.Init(hw.knob2, 0, 1, Parameter::LINEAR);
+    displayWrite("sd config");
+    const char* init = sampler.Init();
 
-     //Initialize the button on pin 28
-    button.Init(hw.seed.GetPin(BUTTON_PIN), 400, Switch::TYPE_MOMENTARY, Switch::POLARITY_INVERTED, Switch::PULL_UP);
-
-
-    hw.StartAdc();
+    displayWrite(init);
 
     // Init Audio
     hw.SetAudioBlockSize(blocksize);
     hw.StartAudio(AudioCallback);
 
-    hw.midi.StartReceive();
-
-
-    display.Fill(false);
-    display.Update();
-
+    InitMidi();
+    midi.StartReceive();
+    
     sampler.Trigger(0, true);
 
     // Loop forever...
     for(;;)
     {
-        hw.ProcessDigitalControls();
 
-        hw.midi.Listen();
+        midi.Listen();
         // Handle MIDI Events
-        while(hw.midi.HasEvents())
+        while(midi.HasEvents())
         {
-            HandleMidiMessage(hw.midi.PopEvent());
-        }
-
-        button.Debounce();
-
-        bool bState = button.Pressed();
-        
-
-        /*if (hw.button1.RisingEdge()) {
-            sampler.Trigger(0, true);
-        }*/
-        if (hw.button2.RisingEdge()) {
-            led2Status = !led2Status;
+            HandleMidiMessage(midi.PopEvent());
         }
 
         sampler.CheckPlaying();
-
-        led1Status = sampler.isPlaying[0];
-
-        hw.led1.Set(led1Status ? 1 : 0, 0, 0);
-        hw.led2.Set(led2Status ? 1 : 0, 0, 0);
-        hw.UpdateLeds();
 
         // this is temp
         //speed = (p_knob1.Process() - 0.5) * 4.0;
 
         // Change file with encoder.
         // this is temp
+        /*
         int inc = hw.encoder.Increment();
         if(inc > 0)
         {
@@ -204,6 +188,6 @@ int main(void)
 
             hw.DelayMs(100);
             hw.StartAudio(AudioCallback);
-        }
+        }*/
     }
 }
