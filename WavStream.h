@@ -40,7 +40,6 @@ class WavStream
     void Stream(double speed = 1);
     
     inline size_t GetNumberFiles() const { return sampleCount; }
-    inline size_t GetCurrentFile() const { return file_sel_; }
 
     size_t GetChannelCount();
 
@@ -50,9 +49,9 @@ class WavStream
     Sample                  sample[kMaxFiles];
 
   private:
-    size_t                  sampleCount, file_sel_;
+    size_t                  sampleCount;
     
-    size_t                  fileSize = 0;
+    size_t                  readHead = 0;
 
 };
 

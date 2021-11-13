@@ -19,7 +19,6 @@ void WavStream::Init()
     FILINFO fno;
     DIR     dir;
     char *  fn;
-    file_sel_ = 0;
     sampleCount = 0;
     // Init Fatfs
     dsy_fatfs_init();
@@ -78,46 +77,56 @@ void WavStream::Init()
                 // Maybe add return type
                 return;
             }
+            
             f_close(&SDFile);
         }
     }
 
     Open(0);
+    Open(1);
 }
 
 size_t WavStream::GetChannelCount() {
-    return sample[file_sel_].fileInfo.raw_data.NbrChannels;
+    return sample[0].fileInfo.raw_data.NbrChannels;
 }
 
 int WavStream::Open(size_t sel)
 {
+    /*
     if(sel != file_sel_)
     {
         f_close(&SDFile);
         file_sel_ = sel < sampleCount ? sel : sampleCount - 1;
-    }
+    }*/
     // Set Buffer Position
-    f_open(&SDFile, sample[file_sel_].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
     f_lseek(&SDFile,
             sizeof(WAV_FormatTypeDef)
-                + sample[file_sel_].fileInfo.raw_data.SubChunk1Size);
+                + sample[sel].fileInfo.raw_data.SubChunk1Size);
 
     UINT bytesread = 0;
-    fileSize = 0;
+    size_t fileSize = 0;
+
+    size_t chanCount = sample[sel].fileInfo.raw_data.NbrChannels;
 
     while(f_eof(&SDFile) == 0) {
         UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);
-        f_read(&SDFile, &bigBuff[fileSize], sizeToRead, &bytesread);
+        f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
         fileSize += bytesread / 2;
     }
 
-    fileSize = fileSize / GetChannelCount();
+    sample[sel].sampleData = &bigBuff[readHead];
 
-    sample[sel].sampleData = &bigBuff[0];
+    readHead += fileSize;
+
+    fileSize = fileSize / chanCount;
+    
     sample[sel].sampleSize = fileSize;
-    sample[sel].chanCount = GetChannelCount();
+    sample[sel].chanCount = chanCount;
     sample[sel].Reset();
+
+    f_close(&SDFile);
 
     return 0;
 }
@@ -129,7 +138,9 @@ int WavStream::Close()
 
 void WavStream::Stream(double speed)
 {
-    sample[file_sel_].Stream(speed);
-    data[0] = sample[file_sel_].data[0];
-    data[1] = sample[file_sel_].data[1];
+    sample[0].Stream(speed);
+    sample[1].Stream(speed);
+    
+    data[0] = sample[0].data[0] + sample[1].data[0];
+    data[1] = sample[0].data[1] + sample[1].data[1];
 }

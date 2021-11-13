@@ -51,9 +51,7 @@ void AudioCallback(const float *in, float *out, size_t size)
         button->Debounce();
         bool state = button->Pressed();
 
-        if (iterator == 0) {
-            sampler.sample[0].SetIsPlaying(state);
-        }
+        sampler.sample[iterator].SetIsPlaying(state);
 
         dsy_gpio_write(leds.at(iterator), state);
         iterator++;
