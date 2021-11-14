@@ -11,6 +11,7 @@ this module. However, by using the extern'd SDFile, etc. I think that would brea
 #include "daisy_core.h"
 #include "util/wav_format.h"
 #include "Sample.h"
+#include "DisplayManager.h"
 
 namespace daisy
 {
@@ -52,6 +53,8 @@ class WavStream
     size_t                  sampleCount;
     
     size_t                  readHead = 0;
+
+    DisplayManager *display = DisplayManager::GetInstance();
 
 };
 

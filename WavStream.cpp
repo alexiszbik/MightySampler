@@ -92,13 +92,8 @@ size_t WavStream::GetChannelCount() {
 
 int WavStream::Open(size_t sel)
 {
-    /*
-    if(sel != file_sel_)
-    {
-        f_close(&SDFile);
-        file_sel_ = sel < sampleCount ? sel : sampleCount - 1;
-    }*/
-    // Set Buffer Position
+    display->Write("loading", sample[sel].fileInfo.name);
+
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
     f_lseek(&SDFile,

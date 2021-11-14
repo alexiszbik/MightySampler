@@ -19,10 +19,11 @@ public:
     static DisplayManager *GetInstance();
 
     void Init(DaisySeed *hw);
-    void Write(const char* message);
+    void Write(const char* title, const char* message = nullptr);
     
 private:
     Display_t display;
+    const int fontHeight = 18;
 
 };
 

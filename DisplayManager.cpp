@@ -22,9 +22,13 @@ void DisplayManager::Init(DaisySeed *hw) {
     display.Init(disp_cfg);
 }
 
-void DisplayManager::Write(const char* message) {
+void DisplayManager::Write(const char* title, const char* message) {
     display.Fill(false);
     display.SetCursor(0, 0);
-    display.WriteString(message, Font_11x18, true);
+    display.WriteString(title, Font_11x18, true);
+    if (message) {
+        display.SetCursor(0, fontHeight);
+        display.WriteString(message, Font_11x18, true);
+    }
     display.Update();
 }
