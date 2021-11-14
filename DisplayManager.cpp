@@ -1,6 +1,16 @@
 
 #include "DisplayManager.h"
 
+DisplayManager* DisplayManager::singleton = nullptr;
+
+DisplayManager *DisplayManager::GetInstance()
+{
+    if(singleton == nullptr){
+        singleton = new DisplayManager();
+    }
+    return singleton;
+}
+
 void DisplayManager::Init(DaisySeed *hw) {
     /** Configure the Display */
     Display_t::Config disp_cfg;

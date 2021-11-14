@@ -34,7 +34,7 @@ DaisySeed    hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
 
-DisplayManager display;
+DisplayManager *display = DisplayManager::GetInstance();
 MidiUartHandler midi;
 
 std::vector<Switch*> buttons;
@@ -98,7 +98,7 @@ void HandleMidiMessage(MidiEvent m)
         default: break;
     }
 
-    display.Write(strbuff);
+    display->Write(strbuff);
 }
 
 void InitButtons() {
@@ -137,7 +137,7 @@ int main(void)
     hw.Configure();
     hw.Init();
 
-    display.Init(&hw);
+    display->Init(&hw);
 
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
@@ -145,11 +145,11 @@ int main(void)
     sd_cfg.speed = SdmmcHandler::Speed::SLOW;
     sdcard.Init(sd_cfg);
 
-    display.Write("Loading SD ...");
+    display->Write("Loading SD ...");
     
     sampler.Init();
 
-    display.Write("OK");
+    display->Write("OK");
 
     InitButtons();
     InitLeds();
@@ -171,44 +171,5 @@ int main(void)
         {
             HandleMidiMessage(midi.PopEvent());
         }
-
-        //sampler.CheckPlaying();
-
-        // this is temp
-        //speed = (p_knob1.Process() - 0.5) * 4.0;
-
-        // Change file with encoder.
-        // this is temp
-        /*
-        int inc = hw.encoder.Increment();
-        if(inc > 0)
-        {
-            hw.StopAudio();
-            hw.DelayMs(100);
-
-            size_t curfile;
-            curfile = sampler.GetCurrentFile();
-            if(curfile < sampler.GetNumberFiles() - 1)
-            {
-                sampler.Open(curfile + 1);
-            }
-            hw.DelayMs(100);
-            hw.StartAudio(AudioCallback);
-        }
-        else if(inc < 0)
-        {
-            hw.StopAudio();
-            hw.DelayMs(100);
-
-            size_t curfile;
-            curfile = sampler.GetCurrentFile();
-            if(curfile > 0)
-            {
-                sampler.Open(curfile - 1);
-            }
-
-            hw.DelayMs(100);
-            hw.StartAudio(AudioCallback);
-        }*/
     }
 }

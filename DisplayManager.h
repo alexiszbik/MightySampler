@@ -11,7 +11,13 @@ using Display_t = OledDisplay<SSD130xI2c128x64Driver>;
 
 class DisplayManager
 {
+protected:
+    DisplayManager() {};
+
+    static DisplayManager* singleton;
 public:
+    static DisplayManager *GetInstance();
+
     void Init(DaisySeed *hw);
     void Write(const char* message);
     
