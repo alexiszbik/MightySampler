@@ -11,10 +11,8 @@
 
 #include "./WavStream.h"
 #include "daisy_pod.h"
-#include "dev/oled_ssd130x.h"
-//#include "daisy_patch.h"
 
-using MyOledDisplay = OledDisplay<SSD130xI2c128x64Driver>;
+#include "DisplayManager.h"
 
 using namespace daisy;
 
@@ -36,7 +34,7 @@ DaisySeed    hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
 
-MyOledDisplay display;
+DisplayManager display;
 MidiUartHandler midi;
 
 std::vector<Switch*> buttons;
@@ -100,19 +98,7 @@ void HandleMidiMessage(MidiEvent m)
         default: break;
     }
 
-    display.Fill(false);
-    display.SetCursor(0, 0);
-    display.WriteString(strbuff, Font_11x18, true);
-
-    display.Update();
-}
-
-void displayWrite(const char* message) {
-    display.Fill(false);
-    display.SetCursor(0, 0);
-    display.WriteString(message, Font_11x18, true);
-    display.Update();
-
+    display.Write(strbuff);
 }
 
 void InitButtons() {
@@ -151,14 +137,7 @@ int main(void)
     hw.Configure();
     hw.Init();
 
-    /** Configure the Display */
-    MyOledDisplay::Config disp_cfg;
-    disp_cfg.driver_config.transport_config.Defaults();
-    disp_cfg.driver_config.transport_config.i2c_config.pin_config.scl = hw.GetPin(11);
-    disp_cfg.driver_config.transport_config.i2c_config.pin_config.sda = hw.GetPin(12);
-    
-    /** And Initialize */
-    display.Init(disp_cfg);
+    display.Init(&hw);
 
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
@@ -166,11 +145,11 @@ int main(void)
     sd_cfg.speed = SdmmcHandler::Speed::SLOW;
     sdcard.Init(sd_cfg);
 
-    displayWrite("Loading SD ...");
+    display.Write("Loading SD ...");
     
     sampler.Init();
 
-    displayWrite("OK");
+    display.Write("OK");
 
     InitButtons();
     InitLeds();

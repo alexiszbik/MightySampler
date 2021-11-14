@@ -5,10 +5,7 @@
 #include "daisy_core.h"
 #include "util/wav_format.h"
 
-#define WAV_FILENAME_MAX \
-    256 /**< Maximum LFN (set to same in FatFs (ffconf.h) */
-
-/** @file hid_WavStream.h */
+#define WAV_FILENAME_MAX 256
 
 using namespace daisy;
 

@@ -2,7 +2,7 @@
 TARGET = MightySampler
 
 # Sources
-CPP_SOURCES = MightySampler.cpp WavStream.cpp Sample.cpp
+CPP_SOURCES = MightySampler.cpp WavStream.cpp Sample.cpp DisplayManager.cpp
 
 # Library Locations
 LIBDAISY_DIR = ../../libdaisy
