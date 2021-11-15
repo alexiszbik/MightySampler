@@ -7,6 +7,10 @@ void Sample::Reset() {
 }
 
 void Sample::SetIsPlaying(bool state) {
+
+    //Should do it on another tread ...
+    //display->Write(fileInfo.name);
+
     if (state && !isPlaying) {
         readPos = 0;
     }

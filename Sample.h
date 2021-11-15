@@ -4,6 +4,7 @@
 
 #include "daisy_core.h"
 #include "util/wav_format.h"
+#include "DisplayManager.h"
 
 #define WAV_FILENAME_MAX 256
 
@@ -53,6 +54,8 @@ private:
     double readPos = 0;
     bool isPlaying = false;
     bool isLooping = true;
+
+    DisplayManager *display = DisplayManager::GetInstance();
 
 };
 

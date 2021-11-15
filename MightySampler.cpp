@@ -60,6 +60,9 @@ void AudioCallback(const float *in, float *out, size_t size)
     {
         sampler.Stream(speed);
 
+        out[i] = sampler.data[0] * 0.5f;
+        out[i + 1] = out[i];
+/*
         if (sampler.GetChannelCount() == 1) {
             out[i] = sampler.data[0] * 0.5f;
             out[i + 1] = out[i];
@@ -67,6 +70,7 @@ void AudioCallback(const float *in, float *out, size_t size)
             out[i] = sampler.data[0] * 0.5f;
             out[i + 1] = sampler.data[1] * 0.5f;
         }
+        */
     }
 }
 
@@ -143,7 +147,7 @@ int main(void)
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
-    sd_cfg.speed = SdmmcHandler::Speed::SLOW;
+    sd_cfg.speed = SdmmcHandler::Speed::MEDIUM_SLOW;
     sdcard.Init(sd_cfg);
 
     display->Write("Loading SD ...");

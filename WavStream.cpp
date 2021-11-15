@@ -80,10 +80,9 @@ void WavStream::Init()
             
             f_close(&SDFile);
         }
-    }
 
-    Open(0);
-    Open(1);
+        Open(i);
+    }
 }
 
 size_t WavStream::GetChannelCount() {
