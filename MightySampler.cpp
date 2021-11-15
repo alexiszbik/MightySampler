@@ -45,13 +45,14 @@ double speed = 1.0;
 void AudioCallback(const float *in, float *out, size_t size)
 {
     int iterator = 0;
+
     for (auto button : buttons) {
         button->Debounce();
         bool state = button->Pressed();
 
-        sampler.sample[iterator].SetIsPlaying(state);
+        sampler.sample[iterator].SetButtonState(state);
 
-        dsy_gpio_write(leds.at(iterator), state);
+        dsy_gpio_write(leds.at(iterator), sampler.sample[iterator].IsPlaying());
         iterator++;
     }
 
@@ -59,7 +60,7 @@ void AudioCallback(const float *in, float *out, size_t size)
     {
         sampler.Stream(speed);
 
-        if (sampler.GetChannelCount()== 1) {
+        if (sampler.GetChannelCount() == 1) {
             out[i] = sampler.data[0] * 0.5f;
             out[i + 1] = out[i];
         } else {

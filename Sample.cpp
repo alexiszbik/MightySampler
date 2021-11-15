@@ -13,6 +13,22 @@ void Sample::SetIsPlaying(bool state) {
     isPlaying = state;
 }
 
+void Sample::SetButtonState(bool state) {
+    /*
+    if (state && !isPlaying) {
+        readPos = 0;
+    }
+    isPlaying = state;
+    */
+    if (state != previousButtonState) {
+        if (state) {
+            SetIsPlaying(!IsPlaying());
+        }
+    }
+
+    previousButtonState = state;
+}
+
 //Table read
 void Sample::TableRead(double index, const size_t tableLength) {
 

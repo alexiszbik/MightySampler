@@ -18,17 +18,29 @@ struct FileInfo
 class Sample
 {
 public:
+    enum EPlayMode {
+        Trigger,
+        Gate,
+        OneShot
+    };
+
+public:
     void Stream(double speed);
     void Reset();
 
-    void SetIsPlaying(bool state);
+    void SetButtonState(bool state);
     bool IsPlaying() { return isPlaying; }
 
 private:
+    void SetIsPlaying(bool state);
     void TableRead(double index, const size_t tableLength);
 
 public:
+    bool previousButtonState = false;
+
     FileInfo fileInfo;
+
+    EPlayMode playMode = Trigger;
 
     size_t sampleSize = 0;
     int16_t* sampleData;
