@@ -16,6 +16,11 @@
 
 using namespace daisy;
 
+#define KNOB_1_PIN 15
+#define KNOB_2_PIN 16
+#define KNOB_3_PIN 17
+#define KNOB_4_PIN 18
+
 #define BUTTON_PIN_A 21
 #define BUTTON_PIN_B 22
 #define BUTTON_PIN_C 23
@@ -29,6 +34,8 @@ using namespace daisy;
 #define LED_PIN_D 30
 #define LED_PIN_E 7
 #define LED_PIN_F 8
+
+
 
 DaisySeed    hw;
 SdmmcHandler sdcard;
@@ -55,6 +62,8 @@ void AudioCallback(const float *in, float *out, size_t size)
         dsy_gpio_write(leds.at(iterator), sampler.sample[iterator].IsPlaying());
         iterator++;
     }
+
+    speed = hw.adc.GetFloat(0);
 
     for(size_t i = 0; i < size; i += 2)
     {
@@ -135,12 +144,29 @@ void InitMidi()
     midi.Init(midi_config);
 }
 
+//float hardwareValue = hardware->adc.GetFloat(pinId);
+
 int main(void)
 {
     // Init hardware
     size_t blocksize = 48;
     hw.Configure();
     hw.Init();
+
+    // Configure the ADC channels using the desired pin
+    auto knobs = {KNOB_1_PIN, KNOB_2_PIN, KNOB_3_PIN, KNOB_4_PIN};
+
+    AdcChannelConfig knob_init[knobs.size()];
+    int iterator = 0;
+    for (int pin : knobs) { 
+        knob_init[iterator].InitSingle(hw.GetPin(pin));
+        iterator++;
+    }
+
+    // Initialize with the knob init struct w/ 2 members
+    // Set Oversampling to 32x
+    hw.adc.Init(knob_init, knobs.size());
+
 
     display->Init(&hw);
 
@@ -158,6 +184,8 @@ int main(void)
 
     InitButtons();
     InitLeds();
+
+    hw.adc.Start();
 
     // Init Audio
     hw.SetAudioBlockSize(blocksize);
