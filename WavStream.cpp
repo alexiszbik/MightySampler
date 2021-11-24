@@ -31,7 +31,6 @@ void WavStream::Init()
    
     f_mount(&SDFatFS, SDPath, 1);
 
-    //return "post fmount";
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
     {
@@ -55,8 +54,10 @@ void WavStream::Init()
             {
                 strcpy(sample[sampleCount].fileInfo.name, fn);
                 sampleCount++;
-                // For now lets break anyway to test.
-                //                break;
+            }
+            if(strstr(fn, ".xml") || strstr(fn, ".XML"))
+            {
+                display->Write(fn);
             }
         }
         else
@@ -90,7 +91,7 @@ void WavStream::Init()
         Open(i);
     }
 
-    display->Write("OK");
+    //display->Write("OK");
 }
 
 size_t WavStream::GetChannelCount() {
@@ -99,7 +100,7 @@ size_t WavStream::GetChannelCount() {
 
 int WavStream::Open(size_t sel)
 {
-    display->Write("loading", sample[sel].fileInfo.name);
+    //display->Write("loading", sample[sel].fileInfo.name);
 
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
@@ -115,7 +116,7 @@ int WavStream::Open(size_t sel)
 
     char strbuff[128];
     sprintf(strbuff, " :%d", sampleRate);
-    display->Write(strbuff);
+    //display->Write(strbuff);
 
     while(f_eof(&SDFile) == 0) {
         UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);
