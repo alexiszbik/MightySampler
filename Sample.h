@@ -47,6 +47,9 @@ public:
     int16_t* sampleData;
 
     size_t chanCount = 1;
+    double sampleRate = 44100;
+    
+    double playingSampleRate = 48000;
 
     float data[2] = {0,0};
 

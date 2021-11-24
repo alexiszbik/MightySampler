@@ -55,6 +55,9 @@ void Sample::TableRead(double index, const size_t tableLength) {
 
 void Sample::Stream(double speed)
 {
+    double srSpeed = sampleRate/playingSampleRate;
+    speed = speed * srSpeed;
+
     if (!isPlaying) {
         data[0] = 0;
         data[1] = 0;

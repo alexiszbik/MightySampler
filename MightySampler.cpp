@@ -70,16 +70,7 @@ void AudioCallback(const float *in, float *out, size_t size)
         sampler.Stream(speed);
 
         out[i] = sampler.data[0] * 0.5f;
-        out[i + 1] = out[i];
-/*
-        if (sampler.GetChannelCount() == 1) {
-            out[i] = sampler.data[0] * 0.5f;
-            out[i + 1] = out[i];
-        } else {
-            out[i] = sampler.data[0] * 0.5f;
-            out[i + 1] = sampler.data[1] * 0.5f;
-        }
-        */
+        out[i + 1] = sampler.data[1] * 0.5f;
     }
 }
 
@@ -153,7 +144,6 @@ int main(void)
     hw.Configure();
     hw.Init();
 
-    // Configure the ADC channels using the desired pin
     auto knobs = {KNOB_1_PIN, KNOB_2_PIN, KNOB_3_PIN, KNOB_4_PIN};
 
     AdcChannelConfig knob_init[knobs.size()];
@@ -163,10 +153,9 @@ int main(void)
         iterator++;
     }
 
-    // Initialize with the knob init struct w/ 2 members
-    // Set Oversampling to 32x
     hw.adc.Init(knob_init, knobs.size());
 
+    double samplerate = hw.AudioSampleRate();
 
     display->Init(&hw);
 
@@ -175,12 +164,8 @@ int main(void)
     sd_cfg.Defaults();
     sd_cfg.speed = SdmmcHandler::Speed::MEDIUM_SLOW;
     sdcard.Init(sd_cfg);
-
-    display->Write("Loading SD ...");
     
     sampler.Init();
-
-    display->Write("OK");
 
     InitButtons();
     InitLeds();
@@ -197,7 +182,6 @@ int main(void)
     // Loop forever...
     for(;;)
     {
-
         midi.Listen();
         // Handle MIDI Events
         while(midi.HasEvents())

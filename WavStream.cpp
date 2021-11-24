@@ -1,6 +1,9 @@
 #include <string.h>
 #include "WavStream.h"
 #include "daisy.h"
+#include <sstream>
+
+
 
 //#include "oled_display.h"
 
@@ -23,6 +26,8 @@ void WavStream::Init()
     // Init Fatfs
     dsy_fatfs_init();
     // Mount SD Card
+
+    display->Write("Loading SD ...");
    
     f_mount(&SDFatFS, SDPath, 1);
 
@@ -30,6 +35,7 @@ void WavStream::Init()
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
     {
+        display->Write("Cannot open Dir ...");
         return;
     }
     do
@@ -83,6 +89,8 @@ void WavStream::Init()
 
         Open(i);
     }
+
+    display->Write("OK");
 }
 
 size_t WavStream::GetChannelCount() {
@@ -103,6 +111,11 @@ int WavStream::Open(size_t sel)
     size_t fileSize = 0;
 
     size_t chanCount = sample[sel].fileInfo.raw_data.NbrChannels;
+    size_t sampleRate = sample[sel].fileInfo.raw_data.SampleRate;
+
+    char strbuff[128];
+    sprintf(strbuff, " :%d", sampleRate);
+    display->Write(strbuff);
 
     while(f_eof(&SDFile) == 0) {
         UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);
@@ -118,6 +131,7 @@ int WavStream::Open(size_t sel)
     
     sample[sel].sampleSize = fileSize;
     sample[sel].chanCount = chanCount;
+    sample[sel].sampleRate = (double)sampleRate;
     sample[sel].Reset();
 
     f_close(&SDFile);
@@ -132,9 +146,16 @@ int WavStream::Close()
 
 void WavStream::Stream(double speed)
 {
-    sample[0].Stream(speed);
-    sample[1].Stream(speed);
+    data[0] = 0;
+    data[1] = 0;
     
-    data[0] = sample[0].data[0] + sample[1].data[0];
-    data[1] = sample[0].data[1] + sample[1].data[1];
+    for (size_t sampler = 0; sampler < 6; sampler++) {
+
+        sample[sampler].Stream(speed);
+
+        for (size_t channel = 0; channel < 2; channel++) {        
+            data[channel] += sample[sampler].data[channel];
+        }
+    }
+    
 }
