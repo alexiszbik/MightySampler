@@ -6,6 +6,8 @@
 #include "util/wav_format.h"
 #include "DisplayManager.h"
 
+#include "Patch.h"
+
 #define WAV_FILENAME_MAX 256
 
 using namespace daisy;
@@ -18,12 +20,6 @@ struct FileInfo
 
 class Sample
 {
-public:
-    enum EPlayMode {
-        Trigger,
-        Gate,
-        OneShot
-    };
 
 public:
     void Stream(double speed);

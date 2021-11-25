@@ -1,11 +1,9 @@
 #include <string.h>
 #include "WavStream.h"
 #include "daisy.h"
-#include <sstream>
 
+#include "Patch.h"
 
-
-//#include "oled_display.h"
 
 DSY_SDRAM_BSS int16_t bigBuff[44100*120];
 
@@ -50,14 +48,16 @@ void WavStream::Init()
         fn = fno.fname;
         if(sampleCount < kMaxFiles - 1)
         {
-            if(strstr(fn, ".wav") || strstr(fn, ".WAV"))
+            /*if(strstr(fn, ".wav") || strstr(fn, ".WAV"))
             {
                 strcpy(sample[sampleCount].fileInfo.name, fn);
                 sampleCount++;
-            }
-            if(strstr(fn, ".xml") || strstr(fn, ".XML"))
+            }*/
+            if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
             {
                 display->Write(fn);
+                patch.loadFile(fn);
+                
             }
         }
         else
@@ -100,7 +100,7 @@ size_t WavStream::GetChannelCount() {
 
 int WavStream::Open(size_t sel)
 {
-    //display->Write("loading", sample[sel].fileInfo.name);
+    display->Write("loading", sample[sel].fileInfo.name);
 
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
@@ -113,10 +113,6 @@ int WavStream::Open(size_t sel)
 
     size_t chanCount = sample[sel].fileInfo.raw_data.NbrChannels;
     size_t sampleRate = sample[sel].fileInfo.raw_data.SampleRate;
-
-    char strbuff[128];
-    sprintf(strbuff, " :%d", sampleRate);
-    //display->Write(strbuff);
 
     while(f_eof(&SDFile) == 0) {
         UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);

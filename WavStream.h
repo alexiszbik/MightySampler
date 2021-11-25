@@ -54,6 +54,8 @@ class WavStream
     
     size_t                  readHead = 0;
 
+    Patch patch;
+
     DisplayManager *display = DisplayManager::GetInstance();
 
 };

@@ -162,7 +162,7 @@ int main(void)
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
-    sd_cfg.speed = SdmmcHandler::Speed::MEDIUM_SLOW;
+    sd_cfg.speed = SdmmcHandler::Speed::SLOW;
     sdcard.Init(sd_cfg);
     
     sampler.Init();

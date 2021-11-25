@@ -5,6 +5,9 @@
 #include "daisy_seed.h"
 #include "dev/oled_ssd130x.h"
 
+#include <string>
+#include <vector>
+
 using namespace daisy;
 
 using Display_t = OledDisplay<SSD130xI2c128x64Driver>;
@@ -20,6 +23,7 @@ public:
 
     void Init(DaisySeed *hw);
     void Write(const char* title, const char* message = nullptr);
+    void Write(std::vector<std::string> messages);
     
 private:
     Display_t display;

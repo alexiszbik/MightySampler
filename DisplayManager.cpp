@@ -32,3 +32,16 @@ void DisplayManager::Write(const char* title, const char* message) {
     }
     display.Update();
 }
+
+void DisplayManager::Write(std::vector<std::string> messages) {
+    display.Fill(false);
+    short iterator = 0;
+    for (auto str : messages) {
+        if (iterator <= 2) {
+            display.SetCursor(0, fontHeight * iterator);
+            display.WriteString(str.c_str(), Font_11x18, true);
+        }
+        iterator++;
+    }
+    display.Update();
+}
