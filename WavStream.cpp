@@ -68,12 +68,17 @@ void WavStream::Init()
     f_closedir(&dir);
     
     // Now we'll go through each file and load the WavInfo.
-    for(size_t i = 0; i < sampleCount; i++)
+    for(size_t i = 0; i < SPLR_COUNT; i++)
     {
+        display->Write("open", patch.buttonDesc[i].sampleName);
+
         size_t bytesread;
-        if(f_open(&SDFile, sample[i].fileInfo.name, (FA_OPEN_EXISTING | FA_READ))
+        if(f_open(&SDFile, patch.buttonDesc[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
+
+            strcpy(sample[i].fileInfo.name, patch.buttonDesc[i].sampleName);
+
             // Populate the WAV Info
             if(f_read(&SDFile,
                       (void *)&sample[i].fileInfo.raw_data,
@@ -86,16 +91,14 @@ void WavStream::Init()
             }
             
             f_close(&SDFile);
+
+            Open(i);
         }
 
-        Open(i);
+        
     }
 
     //display->Write("OK");
-}
-
-size_t WavStream::GetChannelCount() {
-    return sample[0].fileInfo.raw_data.NbrChannels;
 }
 
 int WavStream::Open(size_t sel)

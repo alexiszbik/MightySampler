@@ -24,10 +24,13 @@ public:
     void Init(DaisySeed *hw);
     void Write(const char* title, const char* message = nullptr);
     void Write(std::vector<std::string> messages);
+    void Write(int value);
     
 private:
     Display_t display;
     const int fontHeight = 18;
+
+    char strbuff[24];
 
 };
 

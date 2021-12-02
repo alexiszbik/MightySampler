@@ -42,8 +42,6 @@ class WavStream
     
     inline size_t GetNumberFiles() const { return sampleCount; }
 
-    size_t GetChannelCount();
-
     static constexpr size_t kMaxFiles   = 8;
     float data[2];
 

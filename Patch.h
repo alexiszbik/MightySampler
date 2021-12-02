@@ -8,7 +8,10 @@
 
 #define SPLR_COUNT 6
 
-std::vector buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_C", "BUTTON_D", "BUTTON_E", "BUTTON_F"};
+#define SAMPLE_FILE_NAME_MAX 32
+
+#define SAMPLES_KEY "SAMPLES"
+#define PLAYMODE_KEY "PLAYMODE"
 
 enum EPlayMode {
     Trigger,
@@ -16,15 +19,17 @@ enum EPlayMode {
     OneShot
 };
 
-struct SamplerDesc {
-    std::string sampleName;
+struct ButtonDesc {
+    char sampleName[SAMPLE_FILE_NAME_MAX];
     EPlayMode playMode;
 };
 
 class Patch
 {
 public:
-    SamplerDesc samplerDesc[SPLR_COUNT];
+    Patch();
+
+    ButtonDesc buttonDesc[SPLR_COUNT];
 
     void loadFile(const char* name);
 
@@ -36,6 +41,8 @@ private:
 
     static const short bufferLen = 60;
     char buffer[bufferLen] = "";
+
+    int currentButtonIndex = 0;
 
 };
 

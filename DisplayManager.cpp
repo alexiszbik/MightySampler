@@ -45,3 +45,8 @@ void DisplayManager::Write(std::vector<std::string> messages) {
     }
     display.Update();
 }
+
+void DisplayManager::Write(int value) {
+    sprintf(strbuff, " : %d", value);
+    Write(strbuff);
+}
