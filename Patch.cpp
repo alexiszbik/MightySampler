@@ -4,6 +4,12 @@
 
 static std::vector<const char*> buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_C", "BUTTON_D", "BUTTON_E", "BUTTON_F"};
 
+#define SAMPLES_KEY "SAMPLES"
+#define PLAYMODE_KEY "PLAYMODE"
+
+#define PLAYMODE_KEY_Trigger "Trigger"
+#define PLAYMODE_KEY_Gate "Gate"
+
 Patch::Patch() {
 }
 
@@ -58,12 +64,23 @@ bool Patch::read() {
 
         ButtonDesc* desc = &buttonDesc[currentButtonIndex];
 
-        std::string arg = splitted.at(1);
+        const char* arg = splitted.at(1).c_str();
 
         if (strEquals(cMain, SAMPLES_KEY)) {
-            strcpy(desc->sampleName, arg.c_str());
+            strcpy(desc->sampleName, arg);
+        }
+        if (strEquals(cMain, PLAYMODE_KEY)) {
+            loadPlayMode(arg, desc);
         }
     }
     return true;
 }
 
+void Patch::loadPlayMode(const char* value, ButtonDesc* desc) {
+    if (strEquals(value, PLAYMODE_KEY_Trigger)) {
+        desc->playMode = Trigger;
+    } 
+    if (strEquals(value, PLAYMODE_KEY_Gate)) {
+        desc->playMode = Gate;
+    }  
+}

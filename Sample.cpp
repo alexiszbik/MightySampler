@@ -7,10 +7,6 @@ void Sample::Reset() {
 }
 
 void Sample::SetIsPlaying(bool state) {
-
-    //Should do it on another tread ...
-    //display->Write(fileInfo.name);
-
     if (state && !isPlaying) {
         readPos = 0;
     }
@@ -18,15 +14,14 @@ void Sample::SetIsPlaying(bool state) {
 }
 
 void Sample::SetButtonState(bool state) {
-    /*
-    if (state && !isPlaying) {
-        readPos = 0;
-    }
-    isPlaying = state;
-    */
+
     if (state != previousButtonState) {
-        if (state) {
-            SetIsPlaying(!IsPlaying());
+        if (desc->playMode == Trigger) {
+            if (state) {
+                SetIsPlaying(!IsPlaying());
+            }
+        } else if (desc->playMode == Gate) {
+            SetIsPlaying(state);
         }
     }
 

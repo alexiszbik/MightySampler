@@ -39,17 +39,12 @@ class WavStream
 
     /** \return The next sample if playing, otherwise returns 0 */
     void Stream(double speed = 1);
-    
-    inline size_t GetNumberFiles() const { return sampleCount; }
 
-    static constexpr size_t kMaxFiles   = 8;
     float data[2];
 
-    Sample                  sample[kMaxFiles];
+    Sample sample[SPLR_COUNT];
 
   private:
-    size_t                  sampleCount;
-    
     size_t                  readHead = 0;
 
     Patch patch;

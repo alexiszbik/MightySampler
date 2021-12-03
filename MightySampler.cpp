@@ -35,8 +35,6 @@ using namespace daisy;
 #define LED_PIN_E 7
 #define LED_PIN_F 8
 
-
-
 DaisySeed    hw;
 SdmmcHandler sdcard;
 WavStream    sampler;

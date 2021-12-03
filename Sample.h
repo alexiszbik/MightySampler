@@ -33,11 +33,11 @@ private:
     void TableRead(double index, const size_t tableLength);
 
 public:
+    ButtonDesc* desc = nullptr;
+
     bool previousButtonState = false;
 
     FileInfo fileInfo;
-
-    EPlayMode playMode = Trigger;
 
     size_t sampleSize = 0;
     int16_t* sampleData;

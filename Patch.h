@@ -8,10 +8,7 @@
 
 #define SPLR_COUNT 6
 
-#define SAMPLE_FILE_NAME_MAX 32
-
-#define SAMPLES_KEY "SAMPLES"
-#define PLAYMODE_KEY "PLAYMODE"
+#define SAMPLE_FILE_NAME_MAX 64
 
 enum EPlayMode {
     Trigger,
@@ -32,6 +29,8 @@ public:
     ButtonDesc buttonDesc[SPLR_COUNT];
 
     void loadFile(const char* name);
+
+    void loadPlayMode(const char* value, ButtonDesc* desc);
 
 private:
     bool read();

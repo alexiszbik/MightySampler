@@ -10,6 +10,9 @@ DSY_SDRAM_BSS int16_t bigBuff[44100*120];
 using namespace daisy;
 
 WavStream::WavStream() {
+    for (short i = 0; i < SPLR_COUNT; i++) {
+        sample[i].desc = &patch.buttonDesc[i];
+    }
 }
 
 void WavStream::Init()
@@ -20,7 +23,7 @@ void WavStream::Init()
     FILINFO fno;
     DIR     dir;
     char *  fn;
-    sampleCount = 0;
+
     // Init Fatfs
     dsy_fatfs_init();
     // Mount SD Card
@@ -44,25 +47,12 @@ void WavStream::Init()
         // Skip if its a directory or a hidden file.
         if(fno.fattrib & (AM_HID | AM_DIR))
             continue;
-        // Now we'll check if its .wav and add to the list.
+
         fn = fno.fname;
-        if(sampleCount < kMaxFiles - 1)
+        if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
         {
-            /*if(strstr(fn, ".wav") || strstr(fn, ".WAV"))
-            {
-                strcpy(sample[sampleCount].fileInfo.name, fn);
-                sampleCount++;
-            }*/
-            if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
-            {
-                display->Write(fn);
-                patch.loadFile(fn);
-                
-            }
-        }
-        else
-        {
-            break;
+            display->Write(fn);
+            patch.loadFile(fn);        
         }
     } while(result == FR_OK);
     f_closedir(&dir);
@@ -76,7 +66,6 @@ void WavStream::Init()
         if(f_open(&SDFile, patch.buttonDesc[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
-
             strcpy(sample[i].fileInfo.name, patch.buttonDesc[i].sampleName);
 
             // Populate the WAV Info
@@ -149,7 +138,7 @@ void WavStream::Stream(double speed)
     data[0] = 0;
     data[1] = 0;
     
-    for (size_t sampler = 0; sampler < 6; sampler++) {
+    for (size_t sampler = 0; sampler < SPLR_COUNT; sampler++) {
 
         sample[sampler].Stream(speed);
 
