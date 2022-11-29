@@ -35,6 +35,9 @@ using namespace daisy;
 #define LED_PIN_E 7
 #define LED_PIN_F 8
 
+#define BUTTON_SHIFT 10
+#define BUTTON_CANCEL 9
+
 DaisySeed    hw;
 SdmmcHandler sdcard;
 WavStream    sampler;
@@ -44,6 +47,12 @@ MidiUartHandler midi;
 
 std::vector<Switch*> buttons;
 std::vector<dsy_gpio*> leds;
+
+Switch shiftButton;
+Switch cancelButton;
+
+bool shiftState = false;
+bool cancelState = false;
 
 double speed = 1.0;
 
@@ -59,6 +68,21 @@ void AudioCallback(const float *in, float *out, size_t size)
 
         dsy_gpio_write(leds.at(iterator), sampler.sample[iterator].IsPlaying());
         iterator++;
+    }
+
+    shiftButton.Debounce();
+    cancelButton.Debounce();
+
+    bool newShiftState = shiftButton.Pressed();
+    if (newShiftState != shiftState) {
+        shiftState = newShiftState;
+        display->Write("SHIFT", shiftState ? "ON" : "OFF");
+    }
+    
+    bool newCancelState = cancelButton.Pressed();
+    if (newCancelState != cancelState) {
+        cancelState = newCancelState;
+        display->Write("CANCEL", cancelState ? "ON" : "OFF");
     }
 
     speed = hw.adc.GetFloat(0);
@@ -113,7 +137,9 @@ void InitButtons() {
         button->Init(hw.GetPin(pin), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_INVERTED, Switch::PULL_UP);
         buttons.push_back(button);
     }
-    
+
+    shiftButton.Init(hw.GetPin(BUTTON_SHIFT), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_NORMAL, Switch::PULL_UP);
+    cancelButton.Init(hw.GetPin(BUTTON_CANCEL), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_NORMAL, Switch::PULL_UP);
 }
 
 void InitLeds() {
@@ -156,11 +182,12 @@ int main(void)
     double samplerate = hw.AudioSampleRate();
 
     display->Init(&hw);
+    display->Write("YMNK", "SAMPLER");
 
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
-    sd_cfg.speed = SdmmcHandler::Speed::SLOW;
+    sd_cfg.speed = SdmmcHandler::Speed::STANDARD;
     sdcard.Init(sd_cfg);
     
     sampler.Init();
