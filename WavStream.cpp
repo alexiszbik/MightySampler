@@ -5,7 +5,7 @@
 #include "Patch.h"
 
 
-DSY_SDRAM_BSS int16_t bigBuff[44100*120];
+DSY_SDRAM_BSS int16_t bigBuff[44100*10];
 
 using namespace daisy;
 
@@ -105,9 +105,10 @@ int WavStream::Open(size_t sel)
 
     size_t chanCount = sample[sel].fileInfo.raw_data.NbrChannels;
     size_t sampleRate = sample[sel].fileInfo.raw_data.SampleRate;
+    size_t _fileSize = sample[sel].fileInfo.raw_data.FileSize;
 
     while(f_eof(&SDFile) == 0) {
-        UINT sizeToRead = 44100 * 2 * sizeof(bigBuff[0]);
+        UINT sizeToRead = _fileSize;
         f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
         fileSize += bytesread / 2;
     }

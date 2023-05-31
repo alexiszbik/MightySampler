@@ -11,9 +11,9 @@
 #define SAMPLE_FILE_NAME_MAX 64
 
 enum EPlayMode {
-    Trigger,
-    Gate,
-    OneShot
+    Trigger = 0,
+    Gate = 1,
+    OneShot = 2
 };
 
 struct ButtonDesc {

@@ -9,6 +9,7 @@ static std::vector<const char*> buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_
 
 #define PLAYMODE_KEY_Trigger "Trigger"
 #define PLAYMODE_KEY_Gate "Gate"
+#define PLAYMODE_KEY_OneShot "OneShot"
 
 Patch::Patch() {
 }
@@ -50,7 +51,6 @@ bool Patch::read() {
 
             if (strEquals(cMain, tag)) {
                 buttonIndex = iterator;
-                display->Write(buttonIndex);
             }
 
             iterator++;
@@ -64,13 +64,15 @@ bool Patch::read() {
 
         ButtonDesc* desc = &buttonDesc[currentButtonIndex];
 
-        const char* arg = splitted.at(1).c_str();
+        std::string arg = splitted.at(1);
+        std::remove_if(arg.begin(), arg.end(), isspace);
+        arg.erase(std::remove(arg.begin(), arg.end(), '\n'), arg.cend());
 
         if (strEquals(cMain, SAMPLES_KEY)) {
-            strcpy(desc->sampleName, arg);
+            strcpy(desc->sampleName, arg.c_str());
         }
         if (strEquals(cMain, PLAYMODE_KEY)) {
-            loadPlayMode(arg, desc);
+            loadPlayMode(arg.c_str(), desc);
         }
     }
     return true;
@@ -80,7 +82,12 @@ void Patch::loadPlayMode(const char* value, ButtonDesc* desc) {
     if (strEquals(value, PLAYMODE_KEY_Trigger)) {
         desc->playMode = Trigger;
     } 
-    if (strEquals(value, PLAYMODE_KEY_Gate)) {
+    else if (strEquals(value, PLAYMODE_KEY_Gate)) {
         desc->playMode = Gate;
     }  
+    else if (strEquals(value, PLAYMODE_KEY_OneShot)) {
+        desc->playMode = OneShot;
+    } else {
+        
+    }
 }

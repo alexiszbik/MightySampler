@@ -22,6 +22,12 @@ void Sample::SetButtonState(bool state) {
             }
         } else if (desc->playMode == Gate) {
             SetIsPlaying(state);
+        } else if (desc->playMode == OneShot) {
+            if (state) {
+                isPlaying = false;
+                isLooping = false;
+                SetIsPlaying(true);
+            }
         }
     }
 
@@ -32,7 +38,7 @@ void Sample::SetButtonState(bool state) {
 void Sample::TableRead(double index, const size_t tableLength) {
 
     const double p = index;
-    const double q = floorf(p);
+    const double q = floor(p);
     const double r = p - q;
 
     int nextIndex = q + 1;
@@ -43,8 +49,12 @@ void Sample::TableRead(double index, const size_t tableLength) {
     }
 
     //There is something to do about reading it wrong
-    for (size_t channel = 0; channel < chanCount; channel++) {
-        data[channel] = (1.0 - r) * s162f(sampleData[((int)q) * chanCount + channel]) + (r * s162f(sampleData[nextIndex * chanCount + channel]));
+    for (size_t channel = 0; channel < 2; channel++) {
+        int channelStride = channel % chanCount;
+        data[channel] = (1.0 - r) * s162f(sampleData[((int)q) * chanCount + channelStride]) + (r * s162f(sampleData[nextIndex * chanCount + channelStride]));
+        
+        //LOFI reading, for later
+        //data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
     }
 }
 
