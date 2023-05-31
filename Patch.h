@@ -4,7 +4,7 @@
 
 #include <string>
 #include "fatfs.h"
-#include "DisplayManager.h"
+#include "DaisyYMNK/DisplayManager.h"
 
 #define SPLR_COUNT 6
 

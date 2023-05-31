@@ -65,8 +65,8 @@ bool Patch::read(FIL& SDFile) {
         ButtonDesc* desc = &buttonDesc[currentButtonIndex];
 
         std::string arg = splitted.at(1);
-        std::remove_if(arg.begin(), arg.end(), isspace);
         arg.erase(std::remove(arg.begin(), arg.end(), '\n'), arg.cend());
+        arg.erase(std::remove(arg.begin(), arg.end(), ' '), arg.cend());
 
         if (strEquals(cMain, SAMPLES_KEY)) {
             strcpy(desc->sampleName, arg.c_str());

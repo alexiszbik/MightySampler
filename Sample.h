@@ -4,7 +4,7 @@
 
 #include "daisy_core.h"
 #include "util/wav_format.h"
-#include "DisplayManager.h"
+#include "DaisyYMNK/DisplayManager.h"
 
 #include "Patch.h"
 

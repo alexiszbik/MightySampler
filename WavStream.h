@@ -11,7 +11,7 @@ this module. However, by using the extern'd SDFile, etc. I think that would brea
 #include "daisy_core.h"
 #include "util/wav_format.h"
 #include "Sample.h"
-#include "DisplayManager.h"
+#include "DaisyYMNK/DisplayManager.h"
 
 namespace daisy
 {

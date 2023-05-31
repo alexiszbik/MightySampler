@@ -12,7 +12,7 @@
 #include "./WavStream.h"
 #include "daisy_pod.h"
 
-#include "DisplayManager.h"
+#include "DaisyYMNK/DisplayManager.h"
 
 using namespace daisy;
 
@@ -76,13 +76,13 @@ void AudioCallback(const float *in, float *out, size_t size)
     bool newShiftState = shiftButton.Pressed();
     if (newShiftState != shiftState) {
         shiftState = newShiftState;
-        display->Write("SHIFT", shiftState ? "ON" : "OFF");
+        display->Write({"SHIFT", shiftState ? "ON" : "OFF"});
     }
     
     bool newCancelState = cancelButton.Pressed();
     if (newCancelState != cancelState) {
         cancelState = newCancelState;
-        display->Write("CANCEL", cancelState ? "ON" : "OFF");
+        display->Write({"CANCEL", cancelState ? "ON" : "OFF"});
     }
 
     speed = hw.adc.GetFloat(0);
@@ -125,7 +125,7 @@ void HandleMidiMessage(MidiEvent m)
         default: break;
     }
 
-    display->Write(strbuff);
+    display->Write({strbuff});
 }
 
 void InitButtons() {
@@ -182,7 +182,7 @@ int main(void)
     double samplerate = hw.AudioSampleRate();
 
     display->Init(&hw);
-    display->Write("YMNK", "SAMPLER");
+    display->Write({"YMNK", "SAMPLER"});
 
     //    hw.ClearLeds();
     SdmmcHandler::Config sd_cfg;
@@ -205,6 +205,9 @@ int main(void)
     InitMidi();
     midi.StartReceive();
 
+    int d_count = 0;
+    DisplayManager* display = DisplayManager::GetInstance();
+
     // Loop forever...
     for(;;)
     {
@@ -213,6 +216,13 @@ int main(void)
         while(midi.HasEvents())
         {
             HandleMidiMessage(midi.PopEvent());
+        }
+
+        d_count ++;
+
+        if (d_count > 20) {
+            display->Update();
+            d_count = 0;
         }
     }
 }

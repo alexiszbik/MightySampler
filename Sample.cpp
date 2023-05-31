@@ -29,6 +29,7 @@ void Sample::SetButtonState(bool state) {
                 SetIsPlaying(true);
             }
         }
+        display->Write({desc->sampleName, "[---------]"});
     }
 
     previousButtonState = state;
