@@ -51,6 +51,9 @@ class WavStream
 
     DisplayManager *display = DisplayManager::GetInstance();
 
+    FatFSInterface fsi;
+    FIL  SDFile;
+
 };
 
 } // namespace daisy

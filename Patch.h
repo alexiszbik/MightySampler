@@ -28,12 +28,12 @@ public:
 
     ButtonDesc buttonDesc[SPLR_COUNT];
 
-    void loadFile(const char* name);
+    void loadFile(const char* name,  FIL& SDFile);
 
     void loadPlayMode(const char* value, ButtonDesc* desc);
 
 private:
-    bool read();
+    bool read(FIL& SDFile);
 
 private:
     DisplayManager *display = DisplayManager::GetInstance();

@@ -14,19 +14,19 @@ static std::vector<const char*> buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_
 Patch::Patch() {
 }
 
-void Patch::loadFile(const char* name) {
+void Patch::loadFile(const char* name, FIL& SDFile) {
     f_open(&SDFile, name, (FA_OPEN_EXISTING | FA_READ));
     f_gets((char*)buffer, bufferLen, &SDFile); //first line is shit
 
     bool doIt = true;
     while (doIt) {
-        doIt = read();
+        doIt = read(SDFile);
     }
 
     f_close(&SDFile);
 }
 
-bool Patch::read() {
+bool Patch::read(FIL& SDFile) {
     TCHAR* result = f_gets((char*)buffer, bufferLen, &SDFile);
 
     if (result == nullptr) {

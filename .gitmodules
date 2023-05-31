@@ -4,3 +4,6 @@
 [submodule "DaisySP"]
 	path = DaisySP
 	url = https://github.com/electro-smith/DaisySP.git
+[submodule "DaisyYMNK"]
+	path = DaisyYMNK
+	url = git@github.com:alexiszbik/DaisyYMNK.git

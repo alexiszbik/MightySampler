@@ -9,6 +9,10 @@ DSY_SDRAM_BSS int16_t bigBuff[44100*10];
 
 using namespace daisy;
 
+
+
+#define SDPath "/"
+
 WavStream::WavStream() {
     for (short i = 0; i < SPLR_COUNT; i++) {
         sample[i].desc = &patch.buttonDesc[i];
@@ -24,13 +28,18 @@ void WavStream::Init()
     DIR     dir;
     char *  fn;
 
+    fsi.Init(FatFSInterface::Config::MEDIA_SD);
+
+    // Get a reference to the SD card file system
+    FATFS& SDFatFS = fsi.GetSDFileSystem();
+
     // Init Fatfs
-    dsy_fatfs_init();
+    //dsy_fatfs_init();
     // Mount SD Card
 
     display->Write("Loading SD ...");
    
-    f_mount(&SDFatFS, SDPath, 1);
+    f_mount(&SDFatFS, "/", 1);
 
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
@@ -52,7 +61,7 @@ void WavStream::Init()
         if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
         {
             display->Write(fn);
-            patch.loadFile(fn);        
+            patch.loadFile(fn, SDFile);        
         }
     } while(result == FR_OK);
     f_closedir(&dir);
@@ -62,7 +71,7 @@ void WavStream::Init()
     {
         display->Write("open", patch.buttonDesc[i].sampleName);
 
-        size_t bytesread;
+        UINT bytesread;
         if(f_open(&SDFile, patch.buttonDesc[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
@@ -92,6 +101,9 @@ void WavStream::Init()
 
 int WavStream::Open(size_t sel)
 {
+     // Get a reference to the SD card file system
+    FATFS& SDFatFS = fsi.GetSDFileSystem();
+
     display->Write("loading", sample[sel].fileInfo.name);
 
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
