@@ -7,6 +7,7 @@
 #include "DaisyYMNK/DisplayManager.h"
 
 #include "Patch.h"
+#include "SamplerParameters.h"
 
 #define WAV_FILENAME_MAX 256
 
@@ -20,9 +21,13 @@ struct FileInfo
 
 class Sample
 {
+public:
+    Sample();
 
 public:
-    void Stream(double speed);
+    void Init(double playingSampleRate);
+
+    void Stream();
     void Reset();
 
     void SetButtonState(bool state);
@@ -33,9 +38,8 @@ private:
     void TableRead(double index, const size_t tableLength);
 
 public:
+    SamplerParameterList  parameters;
     ButtonDesc* desc = nullptr;
-
-    bool previousButtonState = false;
 
     FileInfo fileInfo;
 
@@ -50,12 +54,13 @@ public:
     float data[2] = {0,0};
 
 private:
+    bool previousButtonState = false;
+
     double readPos = 0;
     bool isPlaying = false;
     bool isLooping = true;
 
     DisplayManager *display = DisplayManager::GetInstance();
-
 };
 
 

@@ -40,7 +40,7 @@ WavStream::WavStream() {
     }
 }
 
-void WavStream::Init()
+void WavStream::Init(double sampleRate)
 {
     // First check for all .wav files, and add them to the list until its full or there are no more.
     // Only checks '/'
@@ -110,6 +110,10 @@ void WavStream::Init()
 
             Open(i);
         }
+    }
+
+    for (short i = 0; i < SPLR_COUNT; i++) {
+        sample[i].Init(sampleRate);
     }
 }
 
@@ -225,14 +229,14 @@ int WavStream::Close()
     return f_close(&SDFile);
 }
 
-void WavStream::Stream(double speed)
+void WavStream::Stream()
 {
     data[0] = 0;
     data[1] = 0;
     
     for (size_t sampler = 0; sampler < SPLR_COUNT; sampler++) {
 
-        sample[sampler].Stream(speed);
+        sample[sampler].Stream();
 
         for (size_t channel = 0; channel < 2; channel++) {        
             data[channel] += sample[sampler].data[channel];

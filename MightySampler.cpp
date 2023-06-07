@@ -26,8 +26,6 @@ HID hid;
 DisplayManager *display = DisplayManager::GetInstance();
 MidiUartHandler midi;
 
-double speed = 1.0;
-
 void AudioCallback(const float *in, float *out, size_t size)
 {
     hid.ProcessInput(hw);
@@ -40,11 +38,14 @@ void AudioCallback(const float *in, float *out, size_t size)
         i++;
     }
 
-    speed = hid.knobValues.at(1);
+    //for testing only
+    sampler.sample[0].parameters.at(Volume).value = hid.knobValues.at(0);
+    sampler.sample[0].parameters.at(Speed).value = hid.knobValues.at(1);
+    sampler.sample[0].parameters.at(FXSend).value = hid.knobValues.at(2);
 
     for(size_t i = 0; i < size; i += 2)
     {
-        sampler.Stream((speed*2 - 1));
+        sampler.Stream();
 
         out[i] = sampler.data[0] * 0.5f;
         out[i + 1] = sampler.data[1] * 0.5f;
@@ -96,8 +97,6 @@ int main(void)
     hw.Configure();
     hw.Init();
 
-    //double samplerate = hw.AudioSampleRate();
-
     display->Init(&hw);
     display->Write({"YMNK", "SAMPLER"});
 
@@ -107,7 +106,7 @@ int main(void)
     sd_cfg.width = SdmmcHandler::BusWidth::BITS_1;
     sdcard.Init(sd_cfg);
     
-    sampler.Init();
+    sampler.Init(hw.AudioSampleRate());
 
     hid.Init(hw);
 

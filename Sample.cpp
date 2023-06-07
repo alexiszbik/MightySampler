@@ -1,6 +1,13 @@
 #include "Sample.h"
 #include "daisy.h"
 
+Sample::Sample() {
+}
+
+void Sample::Init(double playingSampleRate) {
+    this->playingSampleRate = playingSampleRate;
+}
+
 void Sample::Reset() {
     isPlaying = false;
     readPos = 0;
@@ -58,10 +65,13 @@ void Sample::TableRead(double index, const size_t tableLength) {
     }
 }
 
-void Sample::Stream(double speed)
+void Sample::Stream()
 {
     double srSpeed = sampleRate/playingSampleRate;
-    speed = speed * srSpeed;
+    double speed = (double)parameters.at(Speed).value * srSpeed;
+
+    float volume = parameters.at(Volume).value;
+    volume*=volume;
 
     if (!isPlaying) {
         data[0] = 0;
@@ -70,6 +80,9 @@ void Sample::Stream(double speed)
     } else {
 
         TableRead(readPos, sampleSize);
+
+        data[0] *=volume;
+        data[1] *=volume;
 
         readPos += speed;
 

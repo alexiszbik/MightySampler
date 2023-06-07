@@ -15,7 +15,7 @@ class WavStream
     ~WavStream() {}
 
     /** Initializes the WavStream, loading up to max_files of wav files from an SD Card. */
-    void Init();
+    void Init(double sampleRate);
 
     /** Opens the file at index sel for reading.
     \param sel File to open
@@ -28,7 +28,7 @@ class WavStream
     int Close();
 
     /** \return The next sample if playing, otherwise returns 0 */
-    void Stream(double speed = 1);
+    void Stream();
 
     float data[2];
 
