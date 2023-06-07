@@ -1,6 +1,6 @@
 #include "Patch.h"
-#include "StringTools.h"
-#include "VectorTools.h"
+#include "Tools/StringTools.h"
+#include "Tools/VectorTools.h"
 
 static std::vector<const char*> buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_C", "BUTTON_D", "BUTTON_E", "BUTTON_F"};
 
@@ -40,7 +40,6 @@ bool Patch::read(FIL& SDFile) {
     
     auto cMain = main.c_str();
     
-    int buttonIndex = -1;
     int iterator = 0;
 
     if (splitted.size() == 1) {
@@ -50,17 +49,15 @@ bool Patch::read(FIL& SDFile) {
         for (auto tag : buttons_tags) {
 
             if (strEquals(cMain, tag)) {
-                buttonIndex = iterator;
+                currentButtonIndex = iterator;
+                return true;
             }
 
             iterator++;
         }
     }
 
-    if (buttonIndex >= 0) {
-        currentButtonIndex = buttonIndex;
-
-    } else if (splitted.size() > 1) {
+    if (splitted.size() > 1) {
 
         ButtonDesc* desc = &buttonDesc[currentButtonIndex];
 

@@ -7,6 +7,7 @@ MightySampler.cpp \
 WavStream.cpp \
 Sample.cpp \
 Patch.cpp \
+HID.cpp \
 DaisyYMNK/DisplayManager.cpp 
 
 # Library Locations

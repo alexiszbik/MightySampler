@@ -49,7 +49,6 @@ void Sample::TableRead(double index, const size_t tableLength) {
         nextIndex = (tableLength - 1);
     }
 
-    //There is something to do about reading it wrong
     for (size_t channel = 0; channel < 2; channel++) {
         int channelStride = channel % chanCount;
         data[channel] = (1.0 - r) * s162f(sampleData[((int)q) * chanCount + channelStride]) + (r * s162f(sampleData[nextIndex * chanCount + channelStride]));

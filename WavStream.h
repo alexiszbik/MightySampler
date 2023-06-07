@@ -1,7 +1,6 @@
-
-#pragma once
 #ifndef DSY_WAVSTREAM_H
-#define DSY_WAVSTREAM_H /**< Macro */
+#define DSY_WAVSTREAM_H 
+
 #include "daisy_core.h"
 #include "util/wav_format.h"
 #include "Sample.h"

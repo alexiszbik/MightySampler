@@ -118,9 +118,6 @@ int WavStream::Open(size_t sel)
     display->Write({"loading", sample[sel].fileInfo.name}, true);
 
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
-    
-    /*f_lseek(&SDFile,sizeof(WAV_FormatTypeDef)+ sample[sel].fileInfo.raw_data.SubChunk1Size);
-    */
 
     struct header_wav header;
     UINT br = 0;
@@ -142,16 +139,8 @@ int WavStream::Open(size_t sel)
     f_read(&SDFile, &buf2, sizeof(buf2),  &br);
     header.format = end_buf2_to_int(buf2);
 
-    display->Write({"format :", to_string(header.format)}, true);
-
-    System::Delay(100);
-
     f_read(&SDFile, &buf2, sizeof(buf2),  &br);
     header.chan_ct = end_buf2_to_int(buf2);
-
-    display->Write({"channel c :", to_string(header.chan_ct)}, true);
-
-    System::Delay(100);
 
     f_read(&SDFile, &buf4, sizeof(buf4), &br);
     header.sample_rate = end_buf4_to_int(buf4);
@@ -164,10 +153,6 @@ int WavStream::Open(size_t sel)
 
     f_read(&SDFile, &buf2, sizeof(buf2), &br);
     header.bits_per_sample = end_buf2_to_int(buf2);
-
-    display->Write({"sr :", to_string(header.sample_rate)}, true);
-
-    System::Delay(100);
 
     if (header.bits_per_sample != 8
         && header.bits_per_sample != 16 
@@ -195,7 +180,7 @@ int WavStream::Open(size_t sel)
         unsigned char hack = 'x';
         while (hack != 'd')
             f_read(&SDFile, &hack, sizeof(hack), &br);
-        //fseek(f, -1, SEEK_CUR);
+
         f_lseek(&SDFile, -1);
     } else {
         //printf("header format tag unknown (#^# good bye\n");
@@ -209,10 +194,6 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    display->Write({"duration :", to_string(sample_ct)}, true);
-
-    System::Delay(100);
-
     sample[sel].sampleSize = sample_ct;
     sample[sel].chanCount = header.chan_ct;
     sample[sel].sampleRate = (double)header.sample_rate;
@@ -222,10 +203,6 @@ int WavStream::Open(size_t sel)
 
         UINT bytesread = 0;
         size_t fileSize = 0;
-
-        display->Write({"bpc :", to_string(bytes_per_chan) }, true);
-
-        System::Delay(100);
 
         while(f_eof(&SDFile) == 0) {
             UINT sizeToRead = 128;
