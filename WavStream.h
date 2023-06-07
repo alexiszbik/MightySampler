@@ -1,10 +1,4 @@
-/* Current Limitations:
-- 1x Playback speed only
-- 16-bit, mono files only (otherwise fun weirdness can happen).
-- Only 1 file playing back at a time.
-- Not sure how this would interfere with trying to use the SDCard/FatFs outside of
-this module. However, by using the extern'd SDFile, etc. I think that would break things.
-*/
+
 #pragma once
 #ifndef DSY_WAVSTREAM_H
 #define DSY_WAVSTREAM_H /**< Macro */
@@ -15,9 +9,6 @@ this module. However, by using the extern'd SDFile, etc. I think that would brea
 
 namespace daisy
 {
-/** Wav Player that will load .wav files from an SD Card,
-and then provide a method of accessing the samples with
-double-buffering. */
 class WavStream
 {
   public:

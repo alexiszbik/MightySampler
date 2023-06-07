@@ -4,14 +4,35 @@
 
 #include "Patch.h"
 
-
 DSY_SDRAM_BSS int16_t bigBuff[44100*10];
 
 using namespace daisy;
 
-
-
 #define SDPath "/"
+
+//Orignal .wav reading algorithm : https://gist.github.com/yurapyon/cc44f014491158d2bf2d71c90dd9bf70
+
+struct header_wav {
+    unsigned char riff[4];
+    uint32_t size;
+    unsigned char wave[4];
+    unsigned char fmt[4];
+    uint32_t fmtlen;
+    uint16_t format;
+    uint16_t chan_ct;
+    uint32_t sample_rate;
+    uint32_t byte_rate;
+    uint16_t block_align;
+    uint16_t bits_per_sample;
+    unsigned char fact[4];
+    uint32_t fact_size;
+    uint32_t fact_num_samples;
+    unsigned char data[4];
+    uint32_t data_size;
+};
+
+#define end_buf2_to_int(_buf) ((_buf)[0] | ((_buf)[1] << 8))
+#define end_buf4_to_int(_buf) ((_buf)[0] | ((_buf)[1] << 8) | ((_buf)[2] << 16) | ((_buf)[3] << 24))
 
 WavStream::WavStream() {
     for (short i = 0; i < SPLR_COUNT; i++) {
@@ -33,12 +54,8 @@ void WavStream::Init()
     // Get a reference to the SD card file system
     FATFS& SDFatFS = fsi.GetSDFileSystem();
 
-    // Init Fatfs
-    //dsy_fatfs_init();
     // Mount SD Card
-
     display->Write({"Loading SD ..."}, true);
-   
     f_mount(&SDFatFS, "/", 1);
 
     // Open Dir and scan for files.
@@ -67,6 +84,7 @@ void WavStream::Init()
     f_closedir(&dir);
     
     // Now we'll go through each file and load the WavInfo.
+    //TODO
     for(size_t i = 0; i < SPLR_COUNT; i++)
     {
         display->Write({"open", patch.buttonDesc[i].sampleName}, true);
@@ -92,47 +110,133 @@ void WavStream::Init()
 
             Open(i);
         }
-
-        
     }
 }
 
 int WavStream::Open(size_t sel)
 {
-     // Get a reference to the SD card file system
-    FATFS& SDFatFS = fsi.GetSDFileSystem();
-
     display->Write({"loading", sample[sel].fileInfo.name}, true);
 
     f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
     
-    f_lseek(&SDFile,
-            sizeof(WAV_FormatTypeDef)
-                + sample[sel].fileInfo.raw_data.SubChunk1Size);
+    /*f_lseek(&SDFile,sizeof(WAV_FormatTypeDef)+ sample[sel].fileInfo.raw_data.SubChunk1Size);
+    */
 
-    UINT bytesread = 0;
-    size_t fileSize = 0;
+    struct header_wav header;
+    UINT br = 0;
+    unsigned char buf4[4];
+    unsigned char buf2[2];
 
-    size_t chanCount = sample[sel].fileInfo.raw_data.NbrChannels;
-    size_t sampleRate = sample[sel].fileInfo.raw_data.SampleRate;
-    size_t _fileSize = sample[sel].fileInfo.raw_data.FileSize;
+    f_read(&SDFile, &header.riff, sizeof(header.riff), &br);
 
-    while(f_eof(&SDFile) == 0) {
-        UINT sizeToRead = _fileSize;
-        f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
-        fileSize += bytesread / 2;
+    f_read(&SDFile, &buf4, sizeof(buf4),  &br);
+    header.size = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, &header.wave, sizeof(header.wave),  &br);
+
+    f_read(&SDFile, &header.fmt, sizeof(header.fmt),  &br);
+
+    f_read(&SDFile, &buf4, sizeof(buf4),  &br);
+    header.fmtlen = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, &buf2, sizeof(buf2),  &br);
+    header.format = end_buf2_to_int(buf2);
+
+    display->Write({"format :", to_string(header.format)}, true);
+
+    System::Delay(100);
+
+    f_read(&SDFile, &buf2, sizeof(buf2),  &br);
+    header.chan_ct = end_buf2_to_int(buf2);
+
+    display->Write({"channel c :", to_string(header.chan_ct)}, true);
+
+    System::Delay(100);
+
+    f_read(&SDFile, &buf4, sizeof(buf4), &br);
+    header.sample_rate = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, &buf4, sizeof(buf4), &br);
+    header.byte_rate = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, &buf2, sizeof(buf2), &br);
+    header.block_align = end_buf2_to_int(buf2);
+
+    f_read(&SDFile, &buf2, sizeof(buf2), &br);
+    header.bits_per_sample = end_buf2_to_int(buf2);
+
+    display->Write({"sr :", to_string(header.sample_rate)}, true);
+
+    System::Delay(100);
+
+    if (header.bits_per_sample != 8
+        && header.bits_per_sample != 16 
+        && header.bits_per_sample != 32) {
+        display->Write({"unsupported", "bitrate"}, true);
     }
 
-    sample[sel].sampleData = &bigBuff[readHead];
+    if (header.format == 1) {
+        // do nothing
+    } else if (header.format == 3) {
+        if (header.fmtlen != 16) {
+            //printf("unimplemented data stuff whateve ikdkkkdf\n");
+        }
 
-    readHead += fileSize;
+        f_read(&SDFile, &header.fact, sizeof(header.fact), &br);
 
-    fileSize = fileSize / chanCount;
-    
-    sample[sel].sampleSize = fileSize;
-    sample[sel].chanCount = chanCount;
-    sample[sel].sampleRate = (double)sampleRate;
+        f_read(&SDFile, &buf4, sizeof(buf4), &br);
+        header.fact_size = end_buf4_to_int(buf4);
+
+        f_read(&SDFile, &buf4, sizeof(buf4), &br);
+        header.fact_num_samples = end_buf4_to_int(buf4);
+
+        // f*** whatever else give me the data
+
+        unsigned char hack = 'x';
+        while (hack != 'd')
+            f_read(&SDFile, &hack, sizeof(hack), &br);
+        //fseek(f, -1, SEEK_CUR);
+        f_lseek(&SDFile, -1);
+    } else {
+        //printf("header format tag unknown (#^# good bye\n");
+    }
+
+    f_read(&SDFile, &header.data, sizeof(header.data), &br);
+
+    f_read(&SDFile, &buf4, sizeof(buf4), &br);
+    header.data_size = end_buf4_to_int(buf4);
+
+    uint32_t sample_ct = header.data_size / header.block_align ;
+    int bytes_per_chan = header.block_align / header.chan_ct;
+
+    display->Write({"duration :", to_string(sample_ct)}, true);
+
+    System::Delay(100);
+
+    sample[sel].sampleSize = sample_ct;
+    sample[sel].chanCount = header.chan_ct;
+    sample[sel].sampleRate = (double)header.sample_rate;
     sample[sel].Reset();
+
+    if (header.format == 1) {   // PCM
+
+        UINT bytesread = 0;
+        size_t fileSize = 0;
+
+        display->Write({"bpc :", to_string(bytes_per_chan) }, true);
+
+        System::Delay(100);
+
+        while(f_eof(&SDFile) == 0) {
+            UINT sizeToRead = 128;
+            f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
+            fileSize += bytesread / bytes_per_chan;
+        }
+
+        sample[sel].sampleData = &bigBuff[readHead];
+
+        readHead += fileSize;
+    }
 
     f_close(&SDFile);
 
