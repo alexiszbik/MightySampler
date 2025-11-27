@@ -13,6 +13,14 @@ void Sample::Reset() {
     readPos = 0;
 }
 
+const char* Sample::getName() {
+    return desc->sampleName;
+}
+
+float Sample::getPositionRatio() {
+    return isPlaying ? (float)readPos/(float)sampleSize : 0;
+}
+
 void Sample::SetIsPlaying(bool state) {
     if (state && !isPlaying) {
         readPos = 0;
@@ -36,7 +44,6 @@ void Sample::SetButtonState(bool state) {
                 SetIsPlaying(true);
             }
         }
-        display->Write({desc->sampleName, "[---------]"});
     }
 
     previousButtonState = state;

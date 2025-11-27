@@ -26,6 +26,8 @@ HID hid;
 DisplayManager *display = DisplayManager::GetInstance();
 MidiUartHandler midi;
 
+int lastSamplerId = 0;
+
 void AudioCallback(const float *in, float *out, size_t size)
 {
     hid.ProcessInput(hw);
@@ -35,8 +37,30 @@ void AudioCallback(const float *in, float *out, size_t size)
         sampler.sample[i].SetButtonState(buttonState);
         hid.SetLedState(i,  sampler.sample[i].IsPlaying());
 
+        if (buttonState) {
+            lastSamplerId = i;
+            
+        }
         i++;
     }
+
+    float ratio = sampler.sample[lastSamplerId].getPositionRatio();
+    string progress = "";
+    ratio *= 10.0f;
+    if (ratio != 0) {
+        for (int i = 0; i < 10; i++) {
+            if (i < round(ratio)) {
+                char c = 'X';
+                progress += c; 
+            } else {
+                char c = '-';
+                progress += c; 
+            }
+        }
+    }
+    
+    //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
+    display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
     //for testing only
     sampler.sample[0].parameters.at(Volume).value = hid.knobValues.at(0);
@@ -93,7 +117,7 @@ void InitMidi()
 int main(void)
 {
     // Init hardware
-    size_t blocksize = 48;
+    size_t blocksize = 8;
     hw.Configure();
     hw.Init();
 
@@ -103,7 +127,7 @@ int main(void)
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
     sd_cfg.speed = SdmmcHandler::Speed::FAST;
-    sd_cfg.width = SdmmcHandler::BusWidth::BITS_1;
+    sd_cfg.width = SdmmcHandler::BusWidth::BITS_4;
     sdcard.Init(sd_cfg);
     
     sampler.Init(hw.AudioSampleRate());
@@ -118,7 +142,8 @@ int main(void)
     midi.StartReceive();
 
     int d_count = 0;
-    DisplayManager* display = DisplayManager::GetInstance();
+
+    display->Write({"YMNK", "READY"});
 
     // Loop forever...
     for(;;)
@@ -132,7 +157,7 @@ int main(void)
 
         d_count ++;
 
-        if (d_count > 20) {
+        if (d_count > 4) {
             display->Update();
             d_count = 0;
         }

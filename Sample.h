@@ -33,6 +33,9 @@ public:
     void SetButtonState(bool state);
     bool IsPlaying() { return isPlaying; }
 
+    const char* getName();
+    float getPositionRatio();
+
 private:
     void SetIsPlaying(bool state);
     void TableRead(double index, const size_t tableLength);
@@ -59,8 +62,6 @@ private:
     double readPos = 0;
     bool isPlaying = false;
     bool isLooping = true;
-
-    DisplayManager *display = DisplayManager::GetInstance();
 };
 
 
