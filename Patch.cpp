@@ -51,8 +51,11 @@ bool Patch::read(FIL& SDFile) {
         arg.erase(std::remove(arg.begin(), arg.end(), ' '), arg.cend());
 
         if (strEquals(cMain, SAMPLE_KEY)) {
+
             currentButtonIndex++;
-            desc = &buttonDesc[currentButtonIndex];
+            sampleDescs.push_back(SampleDesc());
+
+            desc = &sampleDescs[currentButtonIndex];
             strcpy(desc->sampleName, arg.c_str());
         }
         if (strEquals(cMain, PLAYMODE_KEY) && desc) {
@@ -62,7 +65,7 @@ bool Patch::read(FIL& SDFile) {
     return true;
 }
 
-void Patch::loadPlayMode(const char* value, ButtonDesc* desc) {
+void Patch::loadPlayMode(const char* value, SampleDesc* desc) {
     if (strEquals(value, PLAYMODE_KEY_Trigger)) {
         desc->playMode = Trigger;
     } 

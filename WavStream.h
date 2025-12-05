@@ -32,7 +32,7 @@ class WavStream
 
     float data[2];
 
-    Sample sample[SPLR_COUNT];
+    vector<Sample> samples;
 
   private:
     size_t readHead = 0;

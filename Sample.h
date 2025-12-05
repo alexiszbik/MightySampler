@@ -42,7 +42,7 @@ private:
 
 public:
     SamplerParameterList  parameters;
-    ButtonDesc* desc = nullptr;
+    SampleDesc* desc = nullptr;
 
     FileInfo fileInfo;
 

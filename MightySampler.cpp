@@ -36,18 +36,18 @@ void AudioCallback(const float *in, float *out, size_t size)
     int i = 0;
     for (auto& buttonState : hid.buttonStates) {
         if (buttonState.changed) {
-            sampler.sample[i].SetState(buttonState.state);
+            sampler.samples[i].SetState(buttonState.state);
             buttonState.changed = false;
             if (buttonState.state) {
                 lastSamplerId = i;
             }
         }
 
-        hid.SetLedState(i, sampler.sample[i].IsPlaying());
+        hid.SetLedState(i, sampler.samples[i].IsPlaying());
         i++;
     }
 
-    float ratio = sampler.sample[lastSamplerId].getPositionRatio();
+    float ratio = sampler.samples[lastSamplerId].getPositionRatio();
     string progress = "";
     ratio *= 10.0f;
     if (ratio != 0) {
@@ -65,9 +65,9 @@ void AudioCallback(const float *in, float *out, size_t size)
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
     //for testing only
-    sampler.sample[0].parameters.at(Volume).value = hid.knobValues.at(0);
-    sampler.sample[0].parameters.at(Speed).value = hid.knobValues.at(1);
-    sampler.sample[0].parameters.at(FXSend).value = hid.knobValues.at(2);
+    sampler.samples[0].parameters.at(Volume).value = hid.knobValues.at(0);
+    sampler.samples[0].parameters.at(Speed).value = hid.knobValues.at(1);
+    sampler.samples[0].parameters.at(FXSend).value = hid.knobValues.at(2);
 
     for(size_t i = 0; i < size; i += 2)
     {
@@ -92,8 +92,8 @@ void HandleMidiMessage(MidiEvent m)
             display->Write({strbuff});
 
             int sampleId = m.data[0];
-            if (sampleId < 6) {
-                sampler.sample[sampleId].SetState(m.data[1] > 0, true);
+            if (sampleId < sampler.samples.size()) {
+                sampler.samples[sampleId].SetState(m.data[1] > 0, true);
             }
             
 
@@ -110,8 +110,8 @@ void HandleMidiMessage(MidiEvent m)
             display->Write({strbuff});
 
             int sampleId = m.data[0];
-            if (sampleId < 6) {
-                sampler.sample[sampleId].SetState(false, true);
+            if (sampleId < sampler.samples.size()) {
+                sampler.samples[sampleId].SetState(false, true);
             }
             
 

@@ -3,10 +3,11 @@
 #define PATCH_H
 
 #include <string>
+#include <vector>
+
 #include "fatfs.h"
 #include "DaisyYMNK/DisplayManager.h"
 
-#define SPLR_COUNT 6
 #define SAMPLE_FILE_NAME_MAX 64
 
 enum EPlayMode {
@@ -15,7 +16,7 @@ enum EPlayMode {
     OneShot = 2
 };
 
-struct ButtonDesc {
+struct SampleDesc {
     char sampleName[SAMPLE_FILE_NAME_MAX];
     EPlayMode playMode;
 };
@@ -30,10 +31,10 @@ public:
 private:
     bool read(FIL& SDFile);
 
-    void loadPlayMode(const char* value, ButtonDesc* desc);
+    void loadPlayMode(const char* value, SampleDesc* desc);
 
 public:
-    ButtonDesc buttonDesc[SPLR_COUNT];
+    vector<SampleDesc> sampleDescs;
 
 private:
     DisplayManager *display = DisplayManager::GetInstance();
@@ -42,7 +43,7 @@ private:
     static const short bufferLen = 60; //Maybe 60 is a lot, but it's working
     char buffer[bufferLen] = "";
     int currentButtonIndex = -1;
-    ButtonDesc* desc = nullptr;
+    SampleDesc* desc = nullptr;
 
 };
 

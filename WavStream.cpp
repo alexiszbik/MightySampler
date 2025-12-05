@@ -35,9 +35,6 @@ struct header_wav {
 #define end_buf4_to_int(_buf) ((_buf)[0] | ((_buf)[1] << 8) | ((_buf)[2] << 16) | ((_buf)[3] << 24))
 
 WavStream::WavStream() {
-    for (short i = 0; i < SPLR_COUNT; i++) {
-        sample[i].desc = &patch.buttonDesc[i];
-    }
 }
 
 void WavStream::Init(double sampleRate)
@@ -84,22 +81,27 @@ void WavStream::Init(double sampleRate)
         }
     } while(result == FR_OK);
     f_closedir(&dir);
+
+    for (short i = 0; i < patch.sampleDescs.size(); i++) {
+        samples.push_back(Sample());
+        samples[i].desc = &patch.sampleDescs.at(i);
+    }
     
     // Now we'll go through each file and load the WavInfo.
     //TODO
-    for(size_t i = 0; i < SPLR_COUNT; i++)
+    for(size_t i = 0; i < samples.size(); i++)
     {
-        display->Write({"open", patch.buttonDesc[i].sampleName}, true);
+        display->Write({"open", patch.sampleDescs[i].sampleName}, true);
 
         UINT bytesread;
-        if(f_open(&SDFile, patch.buttonDesc[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
+        if(f_open(&SDFile, patch.sampleDescs[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
-            strcpy(sample[i].fileInfo.name, patch.buttonDesc[i].sampleName);
+            strcpy(samples[i].fileInfo.name, patch.sampleDescs[i].sampleName);
 
             // Populate the WAV Info
             if(f_read(&SDFile,
-                      (void *)&sample[i].fileInfo.raw_data,
+                      (void *)&samples[i].fileInfo.raw_data,
                       sizeof(WAV_FormatTypeDef),
                       &bytesread)
                != FR_OK)
@@ -114,8 +116,8 @@ void WavStream::Init(double sampleRate)
         }
     }
 
-    for (short i = 0; i < SPLR_COUNT; i++) {
-        sample[i].Init(sampleRate);
+    for (short i = 0; i < samples.size(); i++) {
+        samples[i].Init(sampleRate);
     }
 
     isInit = true;
@@ -123,9 +125,9 @@ void WavStream::Init(double sampleRate)
 
 int WavStream::Open(size_t sel)
 {
-    display->Write({"loading", sample[sel].fileInfo.name}, true);
+    display->Write({"loading", samples[sel].fileInfo.name}, true);
 
-    f_open(&SDFile, sample[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, samples[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
 
     struct header_wav header;
     UINT br = 0;
@@ -202,10 +204,10 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    sample[sel].sampleSize = sample_ct;
-    sample[sel].chanCount = header.chan_ct;
-    sample[sel].sampleRate = (double)header.sample_rate;
-    sample[sel].Reset();
+    samples[sel].sampleSize = sample_ct;
+    samples[sel].chanCount = header.chan_ct;
+    samples[sel].sampleRate = (double)header.sample_rate;
+    samples[sel].Reset();
 
     if (header.format == 1) {   // PCM
 
@@ -218,7 +220,7 @@ int WavStream::Open(size_t sel)
             fileSize += bytesread / bytes_per_chan;
         }
 
-        sample[sel].sampleData = &bigBuff[readHead];
+        samples[sel].sampleData = &bigBuff[readHead];
 
         readHead += fileSize;
     }
@@ -242,12 +244,12 @@ void WavStream::Stream()
         return;
     }
     
-    for (size_t sampler = 0; sampler < SPLR_COUNT; sampler++) {
+    for (size_t sampler = 0; sampler < samples.size(); sampler++) {
 
-        sample[sampler].Stream();
+        samples[sampler].Stream();
 
         for (size_t channel = 0; channel < 2; channel++) {        
-            data[channel] += sample[sampler].data[channel];
+            data[channel] += samples[sampler].data[channel];
         }
     }
     
