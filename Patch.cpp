@@ -2,7 +2,7 @@
 #include "Tools/StringTools.h"
 #include "Tools/VectorTools.h"
 
-#define SAMPLES_KEY "SAMPLES"
+#define SAMPLE_KEY "SAMPLE"
 #define PLAYMODE_KEY "PLAYMODE"
 
 #define PLAYMODE_KEY_Trigger "Trigger"
@@ -50,7 +50,7 @@ bool Patch::read(FIL& SDFile) {
         arg.erase(std::remove(arg.begin(), arg.end(), '\n'), arg.cend());
         arg.erase(std::remove(arg.begin(), arg.end(), ' '), arg.cend());
 
-        if (strEquals(cMain, SAMPLES_KEY)) {
+        if (strEquals(cMain, SAMPLE_KEY)) {
             currentButtonIndex++;
             desc = &buttonDesc[currentButtonIndex];
             strcpy(desc->sampleName, arg.c_str());

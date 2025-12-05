@@ -75,6 +75,8 @@ void WavStream::Init(double sampleRate)
             continue;
 
         fn = fno.fname;
+
+        //Let's load the patch!
         if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
         {
             display->Write({fn}, true);
