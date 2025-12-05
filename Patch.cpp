@@ -2,8 +2,6 @@
 #include "Tools/StringTools.h"
 #include "Tools/VectorTools.h"
 
-static std::vector<const char*> buttons_tags = {"BUTTON_A", "BUTTON_B", "BUTTON_C", "BUTTON_D", "BUTTON_E", "BUTTON_F"};
-
 #define SAMPLES_KEY "SAMPLES"
 #define PLAYMODE_KEY "PLAYMODE"
 
@@ -39,36 +37,25 @@ bool Patch::read(FIL& SDFile) {
     std::string main = splitted.at(0);
     
     auto cMain = main.c_str();
-    
-    int iterator = 0;
-
+    /*
     if (splitted.size() == 1) {
         //Why is there an extra caracter here?
         main.pop_back();
-
-        for (auto tag : buttons_tags) {
-
-            if (strEquals(cMain, tag)) {
-                currentButtonIndex = iterator;
-                return true;
-            }
-
-            iterator++;
-        }
     }
+    */
 
     if (splitted.size() > 1) {
-
-        ButtonDesc* desc = &buttonDesc[currentButtonIndex];
 
         std::string arg = splitted.at(1);
         arg.erase(std::remove(arg.begin(), arg.end(), '\n'), arg.cend());
         arg.erase(std::remove(arg.begin(), arg.end(), ' '), arg.cend());
 
         if (strEquals(cMain, SAMPLES_KEY)) {
+            currentButtonIndex++;
+            desc = &buttonDesc[currentButtonIndex];
             strcpy(desc->sampleName, arg.c_str());
         }
-        if (strEquals(cMain, PLAYMODE_KEY)) {
+        if (strEquals(cMain, PLAYMODE_KEY) && desc) {
             loadPlayMode(arg.c_str(), desc);
         }
     }

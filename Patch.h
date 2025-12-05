@@ -41,8 +41,8 @@ private:
     //Utils for reading patch
     static const short bufferLen = 60; //Maybe 60 is a lot, but it's working
     char buffer[bufferLen] = "";
-
-    int currentButtonIndex = 0;
+    int currentButtonIndex = -1;
+    ButtonDesc* desc = nullptr;
 
 };
 
