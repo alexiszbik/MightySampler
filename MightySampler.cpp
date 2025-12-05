@@ -27,25 +27,38 @@ DisplayManager *display = DisplayManager::GetInstance();
 MidiUartHandler midi;
 
 int lastSamplerId = 0;
+int pageIndex = 0;
 char strbuff[128];
+
+void updateHID() {
+    int i = pageIndex*6;
+    int ledIndex = 0;
+    for (auto& buttonState : hid.buttonStates) {
+
+        if (i < sampler.samples.size()) {
+            
+            if (buttonState.changed) {
+                sampler.samples[i].SetState(buttonState.state);
+                buttonState.changed = false;
+                if (buttonState.state) {
+                    lastSamplerId = i;
+                }
+            }
+
+            hid.SetLedState(ledIndex, sampler.samples[i].IsPlaying());
+        } else {
+            hid.SetLedState(ledIndex, false);
+        }
+        i++;
+        ledIndex++;
+    }
+}
 
 void AudioCallback(const float *in, float *out, size_t size)
 {
     hid.ProcessInput(hw);
 
-    int i = 0;
-    for (auto& buttonState : hid.buttonStates) {
-        if (buttonState.changed) {
-            sampler.samples[i].SetState(buttonState.state);
-            buttonState.changed = false;
-            if (buttonState.state) {
-                lastSamplerId = i;
-            }
-        }
-
-        hid.SetLedState(i, sampler.samples[i].IsPlaying());
-        i++;
-    }
+    updateHID();
 
     float ratio = sampler.samples[lastSamplerId].getPositionRatio();
     string progress = "";
@@ -63,6 +76,17 @@ void AudioCallback(const float *in, float *out, size_t size)
     }
     
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
+
+    if (hid.shiftState) {
+        pageIndex = pageIndex + 1;
+        pageIndex = pageIndex % (int)(floor(sampler.samples.size() / 6) + 1);
+        sprintf(strbuff,
+                    "Shift :%d",
+                    pageIndex);
+        display->Write({strbuff});
+    } else if (hid.cancelState) {
+        display->Write({"Cancel", "CCC"});
+    }
 
     //for testing only
     sampler.samples[0].parameters.at(Volume).value = hid.knobValues.at(0);
@@ -95,8 +119,6 @@ void HandleMidiMessage(MidiEvent m)
             if (sampleId < sampler.samples.size()) {
                 sampler.samples[sampleId].SetState(m.data[1] > 0, true);
             }
-            
-
             break;
         }
 
@@ -113,8 +135,6 @@ void HandleMidiMessage(MidiEvent m)
             if (sampleId < sampler.samples.size()) {
                 sampler.samples[sampleId].SetState(false, true);
             }
-            
-
             break;
         }
         
@@ -130,8 +150,6 @@ void HandleMidiMessage(MidiEvent m)
         }
         default: break;
     }
-
-    
 }
 
 void InitMidi()
