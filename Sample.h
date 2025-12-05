@@ -30,7 +30,7 @@ public:
     void Stream();
     void Reset();
 
-    void SetButtonState(bool state);
+    void SetState(bool state, bool fromMidi = false);
     bool IsPlaying() { return isPlaying; }
 
     const char* getName();

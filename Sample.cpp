@@ -28,14 +28,14 @@ void Sample::SetIsPlaying(bool state) {
     isPlaying = state;
 }
 
-void Sample::SetButtonState(bool state) {
+void Sample::SetState(bool state, bool fromMidi) {
 
     if (state != previousButtonState) {
-        if (desc->playMode == Trigger) {
+        if (desc->playMode == Trigger && !fromMidi) {
             if (state) {
                 SetIsPlaying(!IsPlaying());
             }
-        } else if (desc->playMode == Gate) {
+        } else if (desc->playMode == Gate || (desc->playMode == Trigger && fromMidi)) {
             SetIsPlaying(state);
         } else if (desc->playMode == OneShot) {
             if (state) {

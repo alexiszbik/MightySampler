@@ -65,8 +65,12 @@ void HID::ProcessInput(DaisySeed &hw) {
     for (auto button : buttons) {
         button->Debounce();
         bool state = button->Pressed();
-
-        buttonStates[b++] = state;
+        bool currentState = buttonStates[b].state;
+        if (currentState != state) {
+            buttonStates[b] = {state, true};
+        }
+        
+        b++;
     }
 
     int k = 0;

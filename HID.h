@@ -35,6 +35,11 @@
 using namespace std;
 using namespace daisy;
 
+struct ButtonState {
+    bool state;
+    bool changed;
+};
+
 class HID {
 
 public: 
@@ -49,7 +54,8 @@ private:
     void InitLeds(DaisySeed &hw);
 
 public:
-    vector<bool> buttonStates = vector<bool>(BUTTON_COUNT, false);
+    vector<ButtonState> buttonStates = vector<ButtonState>(BUTTON_COUNT, {false, true});
+
     vector<float> knobValues = vector<float>(KNOB_COUNT, 0);
 
     bool shiftState = false;

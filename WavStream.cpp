@@ -4,7 +4,7 @@
 
 #include "Patch.h"
 
-DSY_SDRAM_BSS int16_t bigBuff[44100*10];
+DSY_SDRAM_BSS int16_t bigBuff[44100*40];
 
 using namespace daisy;
 
@@ -115,6 +115,8 @@ void WavStream::Init(double sampleRate)
     for (short i = 0; i < SPLR_COUNT; i++) {
         sample[i].Init(sampleRate);
     }
+
+    isInit = true;
 }
 
 int WavStream::Open(size_t sel)
@@ -233,6 +235,10 @@ void WavStream::Stream()
 {
     data[0] = 0;
     data[1] = 0;
+
+    if (!isInit) {
+        return;
+    }
     
     for (size_t sampler = 0; sampler < SPLR_COUNT; sampler++) {
 

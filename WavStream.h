@@ -35,7 +35,7 @@ class WavStream
     Sample sample[SPLR_COUNT];
 
   private:
-    size_t                  readHead = 0;
+    size_t readHead = 0;
 
     Patch patch;
 
@@ -43,6 +43,8 @@ class WavStream
 
     FatFSInterface fsi;
     FIL  SDFile;
+
+    bool isInit = false;
 
 };
 

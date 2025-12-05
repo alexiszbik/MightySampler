@@ -27,20 +27,23 @@ DisplayManager *display = DisplayManager::GetInstance();
 MidiUartHandler midi;
 
 int lastSamplerId = 0;
+char strbuff[128];
 
 void AudioCallback(const float *in, float *out, size_t size)
 {
     hid.ProcessInput(hw);
 
     int i = 0;
-    for (auto buttonState : hid.buttonStates) {
-        sampler.sample[i].SetButtonState(buttonState);
-        hid.SetLedState(i,  sampler.sample[i].IsPlaying());
-
-        if (buttonState) {
-            lastSamplerId = i;
-            
+    for (auto& buttonState : hid.buttonStates) {
+        if (buttonState.changed) {
+            sampler.sample[i].SetState(buttonState.state);
+            buttonState.changed = false;
+            if (buttonState.state) {
+                lastSamplerId = i;
+            }
         }
+
+        hid.SetLedState(i, sampler.sample[i].IsPlaying());
         i++;
     }
 
@@ -60,7 +63,6 @@ void AudioCallback(const float *in, float *out, size_t size)
     }
     
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
-    display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
     //for testing only
     sampler.sample[0].parameters.at(Volume).value = hid.knobValues.at(0);
@@ -76,8 +78,6 @@ void AudioCallback(const float *in, float *out, size_t size)
     }
 }
 
-char strbuff[128];
-
 void HandleMidiMessage(MidiEvent m)
 {
     switch(m.type)
@@ -85,14 +85,39 @@ void HandleMidiMessage(MidiEvent m)
         case NoteOn:
         {
             sprintf(strbuff,
-                    "Note :%d %d %d",
+                    "Note On :%d %d %d",
                     m.channel,
                     m.data[0],
                     m.data[1]);
+            display->Write({strbuff});
 
+            int sampleId = m.data[0];
+            if (sampleId < 6) {
+                sampler.sample[sampleId].SetState(m.data[1] > 0, true);
+            }
             
+
+            break;
         }
-        break;
+
+        case NoteOff:
+        {
+            sprintf(strbuff,
+                    "Note Off :%d %d %d",
+                    m.channel,
+                    m.data[0],
+                    m.data[1]);
+            display->Write({strbuff});
+
+            int sampleId = m.data[0];
+            if (sampleId < 6) {
+                sampler.sample[sampleId].SetState(false, true);
+            }
+            
+
+            break;
+        }
+        
         case ControlChange:
         {
             sprintf(strbuff,
@@ -100,12 +125,13 @@ void HandleMidiMessage(MidiEvent m)
                     m.channel,
                     m.data[0],
                     m.data[1]);
+            display->Write({strbuff});
             break;
         }
         default: break;
     }
 
-    display->Write({strbuff});
+    
 }
 
 void InitMidi()
