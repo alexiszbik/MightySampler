@@ -8,6 +8,7 @@ WavStream.cpp \
 Sample.cpp \
 Patch.cpp \
 HID.cpp \
+Button.cpp \
 DaisyYMNK/DisplayManager.cpp 
 
 # Library Locations

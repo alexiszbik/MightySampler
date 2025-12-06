@@ -24,7 +24,7 @@ void HID::InitKnobs(DaisySeed &hw) {
 
 void HID::InitButtons(DaisySeed &hw) {
 
-    int updateRate = 1000;
+    const int updateRate = 1000;
     //Initialize the button on pin 28
     for (int pin : {BUTTON_PIN_A, BUTTON_PIN_B, BUTTON_PIN_C, BUTTON_PIN_D, BUTTON_PIN_E, BUTTON_PIN_F}) {
         auto button = new Switch();
@@ -32,8 +32,8 @@ void HID::InitButtons(DaisySeed &hw) {
         buttons.push_back(button);
     }
 
-    shiftButton.Init(hw.GetPin(BUTTON_SHIFT), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_NORMAL, Switch::PULL_UP);
-    cancelButton.Init(hw.GetPin(BUTTON_CANCEL), updateRate, Switch::TYPE_MOMENTARY, Switch::POLARITY_NORMAL, Switch::PULL_UP);
+    shiftButton.init(hw, BUTTON_SHIFT);
+    cancelButton.init(hw, BUTTON_CANCEL);
 }
 
 void HID::InitLeds(DaisySeed &hw) {
@@ -48,19 +48,17 @@ void HID::InitLeds(DaisySeed &hw) {
 }
 
 void HID::ProcessInput(DaisySeed &hw) {
-    shiftButton.Debounce();
-    cancelButton.Debounce();
-
-    bool newShiftState = shiftButton.Pressed();
-    if (newShiftState != shiftState) {
-        shiftState = newShiftState;
+    if (buttonCallback) {
+        for (auto b : {&shiftButton, &cancelButton}) {
+            if (b->process()) {
+                bool state = b->getState();
+                if (state) {
+                    buttonCallback(b == &shiftButton);
+                }
+            }
+        }
     }
     
-    bool newCancelState = cancelButton.Pressed();
-    if (newCancelState != cancelState) {
-        cancelState = newCancelState;
-    }
-
     int b = 0;
     for (auto button : buttons) {
         button->Debounce();

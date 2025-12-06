@@ -11,7 +11,7 @@
     <ExportAdvancedBuildVariables>false</ExportAdvancedBuildVariables>
     <EmbeddedProfileFile>stm32.xml</EmbeddedProfileFile>
   </Project>
-  <Build xsi:type="com.visualgdb.build.msbuild">
+  <Build xsi:type="com.visualgdb.build.msbuild"t
     <ToolchainID>
       <ID>com.visualgdb.arm-eabi</ID>
       <Version>

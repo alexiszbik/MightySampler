@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+#include "Button.h"
 
 #include "daisy_pod.h"
 
@@ -48,6 +49,9 @@ public:
     
     void SetLedState(int index, bool state);
 
+    using ButtonCallback = void(*)(bool);
+    void setOnButtonPressed(ButtonCallback cb) { buttonCallback = cb; }
+
 private:
     void InitKnobs(DaisySeed &hw);
     void InitButtons(DaisySeed &hw);
@@ -65,8 +69,10 @@ private:
     vector<Switch*> buttons;
     vector<dsy_gpio*> leds;
 
-    Switch shiftButton;
-    Switch cancelButton;
+    Button shiftButton;
+    Button cancelButton;
+
+    ButtonCallback buttonCallback = nullptr;
 };
 
 

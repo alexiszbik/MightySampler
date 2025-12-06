@@ -77,17 +77,6 @@ void AudioCallback(const float *in, float *out, size_t size)
     
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
-    if (hid.shiftState) {
-        pageIndex = pageIndex + 1;
-        pageIndex = pageIndex % (int)(floor(sampler.samples.size() / 6) + 1);
-        sprintf(strbuff,
-                    "Shift :%d",
-                    pageIndex);
-        display->Write({strbuff});
-    } else if (hid.cancelState) {
-        display->Write({"Cancel", "CCC"});
-    }
-
     //for testing only
     sampler.samples[0].parameters.at(Volume).value = hid.knobValues.at(0);
     sampler.samples[0].parameters.at(Speed).value = hid.knobValues.at(1);
@@ -158,6 +147,15 @@ void InitMidi()
     midi.Init(midi_config);
 }
 
+void onButton(bool isShift) {
+    pageIndex = pageIndex + 1;
+    pageIndex = pageIndex % (int)(floor(sampler.samples.size() / 6) + 1);
+    sprintf(strbuff,
+            "Shift :%d",
+            pageIndex);
+    display->Write({strbuff});
+}
+
 int main(void)
 {
     // Init hardware
@@ -188,6 +186,8 @@ int main(void)
     int d_count = 0;
 
     display->Write({"YMNK", "READY"});
+
+    hid.setOnButtonPressed(onButton);
 
     // Loop forever...
     for(;;)
