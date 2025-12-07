@@ -86,21 +86,12 @@ void WavStream::Init(double sampleRate)
 
     for (size_t i = 0; i < patch.layers.size(); i++) {
 
-        layerPlayers.push_back(LayerPlayer());
+        layerPlayers.push_back(LayerPlayer(&patch.layers.at(i)));
         layerPlayers[i].desc = &patch.sampleDescs.at(i);
         layerPlayers[i].sampleData = &patch.sampleDescs.at(i).sampleData;
-        layerPlayers[i].layerData = &patch.layers.at(i);
     }
 
     display->Write({"loading", "resources"}, true);
-
-    sprintf(strbuff,
-                    "hey ; %i %i",
-                    patch.sampleDescs.size(),
-                    patch.layers.size());
-    display->Write({strbuff}, true);
-
-    System::Delay(1000);
     
     // Now we'll go through each file and load the WavInfo.
     //TODO
@@ -125,9 +116,10 @@ void WavStream::Init(double sampleRate)
 
 int WavStream::Open(size_t sel)
 {
-    display->Write({"loading", layerPlayers[sel].desc->sampleName}, true);
+    SampleDesc* desc = &patch.sampleDescs[sel];
+    display->Write({"loading", desc->sampleName}, true);
 
-    f_open(&SDFile, layerPlayers[sel].desc->sampleName, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, desc->sampleName, (FA_OPEN_EXISTING | FA_READ));
 
     struct header_wav header;
     UINT br = 0;
@@ -204,10 +196,9 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    layerPlayers[sel].sampleData->sampleSize = sample_ct;
-    layerPlayers[sel].sampleData->sampleChanCount = header.chan_ct;
-    layerPlayers[sel].sampleData->sampleRate = (double)header.sample_rate;
-    layerPlayers[sel].Reset();
+    desc->sampleData.sampleSize = sample_ct;
+    desc->sampleData.sampleChanCount = header.chan_ct;
+    desc->sampleData.sampleRate = (double)header.sample_rate;
 
     if (header.format == 1) {   // PCM
 
@@ -220,7 +211,7 @@ int WavStream::Open(size_t sel)
             fileSize += bytesread / bytes_per_chan;
         }
 
-        layerPlayers[sel].sampleData->data = &bigBuff[readHead];
+        desc->sampleData.data = &bigBuff[readHead];
 
         readHead += fileSize;
     }

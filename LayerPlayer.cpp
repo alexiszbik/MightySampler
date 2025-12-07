@@ -1,11 +1,13 @@
 #include "LayerPlayer.h"
 #include "daisy.h"
 
-LayerPlayer::LayerPlayer() {
+LayerPlayer::LayerPlayer(LayerData* layerData) {
+    this->layerData = layerData;
 }
 
 void LayerPlayer::Init(double playingSampleRate) {
     this->playingSampleRate = playingSampleRate;
+    Reset();
 }
 
 void LayerPlayer::Reset() {
