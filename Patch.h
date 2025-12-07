@@ -16,12 +16,20 @@ enum EPlayMode {
     OneShot
 };
 
-struct SampleDesc {
-    char sampleName[SAMPLE_FILE_NAME_MAX];
+struct SampleData
+{
+    size_t sampleSize = 0;
+    int16_t* data;
+    uint8_t sampleChanCount = 1;
+    double sampleRate = 44100;
 };
 
-struct LayerData
-{
+struct SampleDesc {
+    char sampleName[SAMPLE_FILE_NAME_MAX];
+    SampleData sampleData;
+};
+
+struct LayerData {
     EPlayMode playMode = OneShot;
 };
 

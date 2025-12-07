@@ -3,7 +3,7 @@
 
 #include "daisy_core.h"
 #include "util/wav_format.h"
-#include "Sample.h"
+#include "LayerPlayer.h"
 #include "DaisyYMNK/DisplayManager.h"
 
 namespace daisy

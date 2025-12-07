@@ -1,4 +1,4 @@
-#include "Sample.h"
+#include "LayerPlayer.h"
 #include "daisy.h"
 
 LayerPlayer::LayerPlayer() {
@@ -18,7 +18,7 @@ const char* LayerPlayer::getName() {
 }
 
 float LayerPlayer::getPositionRatio() {
-    return isPlaying ? (float)readPos/(float)sampleData.sampleSize : 0;
+    return isPlaying ? (float)readPos/(float)sampleData->sampleSize : 0;
 }
 
 void LayerPlayer::SetIsPlaying(bool state) {
@@ -72,8 +72,8 @@ void LayerPlayer::TableRead(double index, const size_t tableLength) {
     }
 
     for (uint8_t channel = 0; channel < dataChanCount; channel++) {
-        uint8_t channelStride = channel % sampleData.sampleChanCount;
-        data[channel] = (1.0 - r) * s162f(sampleData.sampleData[((int)q) * sampleData.sampleChanCount + channelStride]) + (r * s162f(sampleData.sampleData[nextIndex * sampleData.sampleChanCount + channelStride]));
+        uint8_t channelStride = channel % sampleData->sampleChanCount;
+        data[channel] = (1.0 - r) * s162f(sampleData->data[((int)q) * sampleData->sampleChanCount + channelStride]) + (r * s162f(sampleData->data[nextIndex * sampleData->sampleChanCount + channelStride]));
         
         //LOFI reading, for later
         //data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
@@ -82,7 +82,7 @@ void LayerPlayer::TableRead(double index, const size_t tableLength) {
 
 void LayerPlayer::Stream()
 {
-    double srSpeed = sampleData.sampleRate/playingSampleRate;
+    double srSpeed = sampleData->sampleRate/playingSampleRate;
     double speed = (double)parameters.at(Speed).value * srSpeed;
 
     float volume = parameters.at(Volume).value;
@@ -94,7 +94,7 @@ void LayerPlayer::Stream()
         } 
     } else {
 
-        TableRead(readPos, sampleData.sampleSize);
+        TableRead(readPos, sampleData->sampleSize);
 
         for (uint8_t c = 0; c < dataChanCount; c++) {
             data[c] *= volume;
@@ -103,7 +103,7 @@ void LayerPlayer::Stream()
         readPos += speed;
 
         if (speed > 0) {
-            if (readPos >= sampleData.sampleSize) {
+            if (readPos >= sampleData->sampleSize) {
                 if (isLooping) {
                     readPos = readPos - trunc(readPos);
                 } else {
@@ -113,7 +113,7 @@ void LayerPlayer::Stream()
         } else {
             if (readPos < 0) {
                 if (isLooping) {
-                    readPos += (sampleData.sampleSize - 1);
+                    readPos += (sampleData->sampleSize - 1);
                 } else {
                     Reset();
                 }

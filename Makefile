@@ -5,7 +5,7 @@ TARGET = MightySampler
 CPP_SOURCES = \
 MightySampler.cpp \
 WavStream.cpp \
-Sample.cpp \
+LayerPlayer.cpp \
 Patch.cpp \
 HID.cpp \
 Button.cpp \

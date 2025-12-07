@@ -11,20 +11,6 @@
 
 using namespace daisy;
 
-struct FileInfo
-{
-    WAV_FormatTypeDef raw_data;               /**< Raw wav data */
-    char              name[WAV_FILENAME_MAX]; /**< Wav filename */
-};
-
-struct SampleData
-{
-    size_t sampleSize = 0;
-    int16_t* sampleData;
-    uint8_t sampleChanCount = 1;
-    double sampleRate = 44100;
-};
-
 class LayerPlayer
 {
 public:
@@ -52,11 +38,8 @@ public:
     SamplerParameterList  parameters;
 
     SampleDesc* desc = nullptr;
+    SampleData* sampleData = nullptr;
     LayerData* layerData = nullptr;
-
-    FileInfo fileInfo;
-
-    SampleData sampleData;
     
     double playingSampleRate = 48000;
     

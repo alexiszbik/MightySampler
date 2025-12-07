@@ -88,6 +88,7 @@ void WavStream::Init(double sampleRate)
 
         layerPlayers.push_back(LayerPlayer());
         layerPlayers[i].desc = &patch.sampleDescs.at(i);
+        layerPlayers[i].sampleData = &patch.sampleDescs.at(i).sampleData;
         layerPlayers[i].layerData = &patch.layers.at(i);
     }
 
@@ -107,28 +108,15 @@ void WavStream::Init(double sampleRate)
     {
         display->Write({"open", patch.sampleDescs[i].sampleName}, true);
 
-        UINT bytesread;
         if(f_open(&SDFile, patch.sampleDescs[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
-            strcpy(layerPlayers[i].fileInfo.name, patch.sampleDescs[i].sampleName);
-
-            // Populate the WAV Info
-            if(f_read(&SDFile,
-                      (void *)&layerPlayers[i].fileInfo.raw_data,
-                      sizeof(WAV_FormatTypeDef),
-                      &bytesread)
-               != FR_OK)
-            {
-                // Maybe add return type
-                return;
-            }
             f_close(&SDFile);
             Open(i);
         }
     }
 
-    for (short i = 0; i < layerPlayers.size(); i++) {
+    for (uint8_t i = 0; i < layerPlayers.size(); i++) {
         layerPlayers[i].Init(sampleRate);
     }
 
@@ -137,9 +125,9 @@ void WavStream::Init(double sampleRate)
 
 int WavStream::Open(size_t sel)
 {
-    display->Write({"loading", layerPlayers[sel].fileInfo.name}, true);
+    display->Write({"loading", layerPlayers[sel].desc->sampleName}, true);
 
-    f_open(&SDFile, layerPlayers[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, layerPlayers[sel].desc->sampleName, (FA_OPEN_EXISTING | FA_READ));
 
     struct header_wav header;
     UINT br = 0;
@@ -216,9 +204,9 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    layerPlayers[sel].sampleData.sampleSize = sample_ct;
-    layerPlayers[sel].sampleData.sampleChanCount = header.chan_ct;
-    layerPlayers[sel].sampleData.sampleRate = (double)header.sample_rate;
+    layerPlayers[sel].sampleData->sampleSize = sample_ct;
+    layerPlayers[sel].sampleData->sampleChanCount = header.chan_ct;
+    layerPlayers[sel].sampleData->sampleRate = (double)header.sample_rate;
     layerPlayers[sel].Reset();
 
     if (header.format == 1) {   // PCM
@@ -232,7 +220,7 @@ int WavStream::Open(size_t sel)
             fileSize += bytesread / bytes_per_chan;
         }
 
-        layerPlayers[sel].sampleData.sampleData = &bigBuff[readHead];
+        layerPlayers[sel].sampleData->data = &bigBuff[readHead];
 
         readHead += fileSize;
     }
