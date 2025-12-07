@@ -204,9 +204,9 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    samples[sel].sampleSize = sample_ct;
-    samples[sel].chanCount = header.chan_ct;
-    samples[sel].sampleRate = (double)header.sample_rate;
+    samples[sel].sampleData.sampleSize = sample_ct;
+    samples[sel].sampleData.sampleChanCount = header.chan_ct;
+    samples[sel].sampleData.sampleRate = (double)header.sample_rate;
     samples[sel].Reset();
 
     if (header.format == 1) {   // PCM
@@ -220,7 +220,7 @@ int WavStream::Open(size_t sel)
             fileSize += bytesread / bytes_per_chan;
         }
 
-        samples[sel].sampleData = &bigBuff[readHead];
+        samples[sel].sampleData.sampleData = &bigBuff[readHead];
 
         readHead += fileSize;
     }
@@ -237,8 +237,9 @@ int WavStream::Close()
 
 void WavStream::Stream()
 {
-    data[0] = 0;
-    data[1] = 0;
+    for (uint8_t c = 0; c < dataChanCount; c++) { 
+        data[c] = 0;
+    }  
 
     if (!isInit) {
         return;
@@ -248,8 +249,8 @@ void WavStream::Stream()
 
         samples[sampler].Stream();
 
-        for (size_t channel = 0; channel < 2; channel++) {        
-            data[channel] += samples[sampler].data[channel];
+        for (uint8_t c = 0; c < dataChanCount; c++) {        
+            data[c] += samples[sampler].data[c];
         }
     }
     

@@ -14,7 +14,7 @@ Patch::Patch() {
 
 void Patch::loadFile(const char* name, FIL& SDFile) {
     f_open(&SDFile, name, (FA_OPEN_EXISTING | FA_READ));
-    f_gets((char*)buffer, bufferLen, &SDFile); //first line is shit
+    f_gets((char*)buffer, bufferLen, &SDFile); //first line is shit? do we really need a first blank line?
 
     bool doIt = true;
     while (doIt) {
@@ -28,7 +28,7 @@ bool Patch::read(FIL& SDFile) {
     TCHAR* result = f_gets((char*)buffer, bufferLen, &SDFile);
 
     if (result == nullptr) {
-        return false;
+        return false; //stop reading
     }
 
     std::vector<std::string> splitted;

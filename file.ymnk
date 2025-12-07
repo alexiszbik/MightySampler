@@ -1,0 +1,24 @@
+
+SAMPLE beat.wav
+PLAYMODE Trigger
+
+SAMPLE shake.wav
+PLAYMODE Gate
+
+SAMPLE c64.wav
+PLAYMODE OneShot
+
+SAMPLE guitar.wav
+PLAYMODE Trigger
+
+SAMPLE pad.wav
+PLAYMODE Trigger
+
+SAMPLE down.wav
+PLAYMODE OneShot
+
+SAMPLE sliced.wav
+PLAYMODE Trigger
+
+SAMPLE dha.wav
+PLAYMODE OneShot

@@ -1,6 +1,4 @@
-
-#ifndef SAMPLE_H
-#define SAMPLE_H
+#pragma once
 
 #include "daisy_core.h"
 #include "util/wav_format.h"
@@ -17,6 +15,14 @@ struct FileInfo
 {
     WAV_FormatTypeDef raw_data;               /**< Raw wav data */
     char              name[WAV_FILENAME_MAX]; /**< Wav filename */
+};
+
+struct SampleData
+{
+    size_t sampleSize = 0;
+    int16_t* sampleData;
+    uint8_t sampleChanCount = 1;
+    double sampleRate = 44100;
 };
 
 class Sample
@@ -41,20 +47,18 @@ private:
     void TableRead(double index, const size_t tableLength);
 
 public:
+    static constexpr uint8_t dataChanCount = 2;
+
     SamplerParameterList  parameters;
     SampleDesc* desc = nullptr;
 
     FileInfo fileInfo;
 
-    size_t sampleSize = 0;
-    int16_t* sampleData;
-
-    size_t chanCount = 1;
-    double sampleRate = 44100;
+    SampleData sampleData;
     
     double playingSampleRate = 48000;
-
-    float data[2] = {0,0};
+    
+    float data[dataChanCount] = {0,0};
 
 private:
     bool previousButtonState = false;
@@ -64,5 +68,3 @@ private:
     bool isLooping = true;
 };
 
-
-#endif //SAMPLE_H

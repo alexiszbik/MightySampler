@@ -18,7 +18,7 @@ const char* Sample::getName() {
 }
 
 float Sample::getPositionRatio() {
-    return isPlaying ? (float)readPos/(float)sampleSize : 0;
+    return isPlaying ? (float)readPos/(float)sampleData.sampleSize : 0;
 }
 
 void Sample::SetIsPlaying(bool state) {
@@ -71,9 +71,9 @@ void Sample::TableRead(double index, const size_t tableLength) {
         nextIndex = (tableLength - 1);
     }
 
-    for (size_t channel = 0; channel < 2; channel++) {
-        int channelStride = channel % chanCount;
-        data[channel] = (1.0 - r) * s162f(sampleData[((int)q) * chanCount + channelStride]) + (r * s162f(sampleData[nextIndex * chanCount + channelStride]));
+    for (uint8_t channel = 0; channel < dataChanCount; channel++) {
+        uint8_t channelStride = channel % sampleData.sampleChanCount;
+        data[channel] = (1.0 - r) * s162f(sampleData.sampleData[((int)q) * sampleData.sampleChanCount + channelStride]) + (r * s162f(sampleData.sampleData[nextIndex * sampleData.sampleChanCount + channelStride]));
         
         //LOFI reading, for later
         //data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
@@ -82,27 +82,28 @@ void Sample::TableRead(double index, const size_t tableLength) {
 
 void Sample::Stream()
 {
-    double srSpeed = sampleRate/playingSampleRate;
+    double srSpeed = sampleData.sampleRate/playingSampleRate;
     double speed = (double)parameters.at(Speed).value * srSpeed;
 
     float volume = parameters.at(Volume).value;
     volume*=volume;
 
     if (!isPlaying) {
-        data[0] = 0;
-        data[1] = 0;
-        
+        for (uint8_t c = 0; c < dataChanCount; c++) {
+            data[c] = 0;
+        } 
     } else {
 
-        TableRead(readPos, sampleSize);
+        TableRead(readPos, sampleData.sampleSize);
 
-        data[0] *=volume;
-        data[1] *=volume;
+        for (uint8_t c = 0; c < dataChanCount; c++) {
+            data[c] *= volume;
+        }
 
         readPos += speed;
 
         if (speed > 0) {
-            if (readPos >= sampleSize) {
+            if (readPos >= sampleData.sampleSize) {
                 if (isLooping) {
                     readPos = readPos - trunc(readPos);
                 } else {
@@ -112,7 +113,7 @@ void Sample::Stream()
         } else {
             if (readPos < 0) {
                 if (isLooping) {
-                    readPos += (sampleSize - 1);
+                    readPos += (sampleData.sampleSize - 1);
                 } else {
                     Reset();
                 }

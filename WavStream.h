@@ -30,7 +30,9 @@ class WavStream
     /** \return The next sample if playing, otherwise returns 0 */
     void Stream();
 
-    float data[2];
+    static constexpr uint8_t dataChanCount = 2;
+
+    float data[dataChanCount];
 
     vector<Sample> samples;
 

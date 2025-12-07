@@ -1,11 +1,9 @@
 #include "HID.h"
 
 void HID::Init(DaisySeed &hw) {
-    
     InitButtons(hw);
     InitLeds(hw);
     InitKnobs(hw);
-    
 }
 
 void HID::InitKnobs(DaisySeed &hw) {

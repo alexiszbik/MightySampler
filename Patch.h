@@ -12,13 +12,13 @@
 
 enum EPlayMode {
     Trigger = 0,
-    Gate = 1,
-    OneShot = 2
+    Gate,
+    OneShot
 };
 
 struct SampleDesc {
     char sampleName[SAMPLE_FILE_NAME_MAX];
-    EPlayMode playMode;
+    EPlayMode playMode = OneShot;
 };
 
 class Patch
@@ -42,6 +42,7 @@ private:
     //Utils for reading patch
     static const short bufferLen = 60; //Maybe 60 is a lot, but it's working
     char buffer[bufferLen] = "";
+
     int currentButtonIndex = -1;
     SampleDesc* desc = nullptr;
 
