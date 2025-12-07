@@ -82,14 +82,28 @@ void WavStream::Init(double sampleRate)
     } while(result == FR_OK);
     f_closedir(&dir);
 
-    for (short i = 0; i < patch.sampleDescs.size(); i++) {
-        samples.push_back(Sample());
-        samples[i].desc = &patch.sampleDescs.at(i);
+    display->Write({"init", "layers"}, true);
+
+    for (size_t i = 0; i < patch.layers.size(); i++) {
+
+        layerPlayers.push_back(LayerPlayer());
+        layerPlayers[i].desc = &patch.sampleDescs.at(i);
+        layerPlayers[i].layerData = &patch.layers.at(i);
     }
+
+    display->Write({"loading", "resources"}, true);
+
+    sprintf(strbuff,
+                    "hey ; %i %i",
+                    patch.sampleDescs.size(),
+                    patch.layers.size());
+    display->Write({strbuff}, true);
+
+    System::Delay(1000);
     
     // Now we'll go through each file and load the WavInfo.
     //TODO
-    for(size_t i = 0; i < samples.size(); i++)
+    for(size_t i = 0; i < layerPlayers.size(); i++)
     {
         display->Write({"open", patch.sampleDescs[i].sampleName}, true);
 
@@ -97,11 +111,11 @@ void WavStream::Init(double sampleRate)
         if(f_open(&SDFile, patch.sampleDescs[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
         {
-            strcpy(samples[i].fileInfo.name, patch.sampleDescs[i].sampleName);
+            strcpy(layerPlayers[i].fileInfo.name, patch.sampleDescs[i].sampleName);
 
             // Populate the WAV Info
             if(f_read(&SDFile,
-                      (void *)&samples[i].fileInfo.raw_data,
+                      (void *)&layerPlayers[i].fileInfo.raw_data,
                       sizeof(WAV_FormatTypeDef),
                       &bytesread)
                != FR_OK)
@@ -109,15 +123,13 @@ void WavStream::Init(double sampleRate)
                 // Maybe add return type
                 return;
             }
-            
             f_close(&SDFile);
-
             Open(i);
         }
     }
 
-    for (short i = 0; i < samples.size(); i++) {
-        samples[i].Init(sampleRate);
+    for (short i = 0; i < layerPlayers.size(); i++) {
+        layerPlayers[i].Init(sampleRate);
     }
 
     isInit = true;
@@ -125,9 +137,9 @@ void WavStream::Init(double sampleRate)
 
 int WavStream::Open(size_t sel)
 {
-    display->Write({"loading", samples[sel].fileInfo.name}, true);
+    display->Write({"loading", layerPlayers[sel].fileInfo.name}, true);
 
-    f_open(&SDFile, samples[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
+    f_open(&SDFile, layerPlayers[sel].fileInfo.name, (FA_OPEN_EXISTING | FA_READ));
 
     struct header_wav header;
     UINT br = 0;
@@ -204,10 +216,10 @@ int WavStream::Open(size_t sel)
     uint32_t sample_ct = header.data_size / header.block_align ;
     int bytes_per_chan = header.block_align / header.chan_ct;
 
-    samples[sel].sampleData.sampleSize = sample_ct;
-    samples[sel].sampleData.sampleChanCount = header.chan_ct;
-    samples[sel].sampleData.sampleRate = (double)header.sample_rate;
-    samples[sel].Reset();
+    layerPlayers[sel].sampleData.sampleSize = sample_ct;
+    layerPlayers[sel].sampleData.sampleChanCount = header.chan_ct;
+    layerPlayers[sel].sampleData.sampleRate = (double)header.sample_rate;
+    layerPlayers[sel].Reset();
 
     if (header.format == 1) {   // PCM
 
@@ -220,7 +232,7 @@ int WavStream::Open(size_t sel)
             fileSize += bytesread / bytes_per_chan;
         }
 
-        samples[sel].sampleData.sampleData = &bigBuff[readHead];
+        layerPlayers[sel].sampleData.sampleData = &bigBuff[readHead];
 
         readHead += fileSize;
     }
@@ -245,12 +257,12 @@ void WavStream::Stream()
         return;
     }
     
-    for (size_t sampler = 0; sampler < samples.size(); sampler++) {
+    for (size_t sampler = 0; sampler < layerPlayers.size(); sampler++) {
 
-        samples[sampler].Stream();
+        layerPlayers[sampler].Stream();
 
         for (uint8_t c = 0; c < dataChanCount; c++) {        
-            data[c] += samples[sampler].data[c];
+            data[c] += layerPlayers[sampler].data[c];
         }
     }
     

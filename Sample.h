@@ -25,10 +25,10 @@ struct SampleData
     double sampleRate = 44100;
 };
 
-class Sample
+class LayerPlayer
 {
 public:
-    Sample();
+    LayerPlayer();
 
 public:
     void Init(double playingSampleRate);
@@ -50,7 +50,9 @@ public:
     static constexpr uint8_t dataChanCount = 2;
 
     SamplerParameterList  parameters;
+
     SampleDesc* desc = nullptr;
+    LayerData* layerData = nullptr;
 
     FileInfo fileInfo;
 

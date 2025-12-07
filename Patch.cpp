@@ -3,6 +3,7 @@
 #include "Tools/VectorTools.h"
 
 #define SAMPLE_KEY "SAMPLE"
+#define LAYER_KEY "LAYER"
 #define PLAYMODE_KEY "PLAYMODE"
 
 #define PLAYMODE_KEY_Trigger "Trigger"
@@ -32,17 +33,26 @@ bool Patch::read(FIL& SDFile) {
     }
 
     std::vector<std::string> splitted;
-    tokenize(buffer, splitted);
+    tokenize(buffer, splitted); //split line with " "
 
     std::string main = splitted.at(0);
     
     auto cMain = main.c_str();
-    /*
+
+    display->Write(splitted, true);
+    
     if (splitted.size() == 1) {
         //Why is there an extra caracter here?
         main.pop_back();
+
+        if (strEquals(cMain, LAYER_KEY)) {
+
+            currentLayerIndex++;
+            layers.push_back(LayerData());
+
+            currentLayerData = &layers[currentLayerIndex];
+        }
     }
-    */
 
     if (splitted.size() > 1) {
 
@@ -52,28 +62,29 @@ bool Patch::read(FIL& SDFile) {
 
         if (strEquals(cMain, SAMPLE_KEY)) {
 
-            currentButtonIndex++;
+            currentSampleIndex++;
             sampleDescs.push_back(SampleDesc());
 
-            desc = &sampleDescs[currentButtonIndex];
-            strcpy(desc->sampleName, arg.c_str());
+            currentSampleDesc = &sampleDescs[currentSampleIndex];
+            strcpy(currentSampleDesc->sampleName, arg.c_str());
         }
-        if (strEquals(cMain, PLAYMODE_KEY) && desc) {
-            loadPlayMode(arg.c_str(), desc);
+        
+        if (strEquals(cMain, PLAYMODE_KEY) && currentLayerData) {
+            loadPlayMode(arg.c_str(), currentLayerData);
         }
     }
     return true;
 }
 
-void Patch::loadPlayMode(const char* value, SampleDesc* desc) {
+void Patch::loadPlayMode(const char* value, LayerData* ld) {
     if (strEquals(value, PLAYMODE_KEY_Trigger)) {
-        desc->playMode = Trigger;
+        ld->playMode = Trigger;
     } 
     else if (strEquals(value, PLAYMODE_KEY_Gate)) {
-        desc->playMode = Gate;
+        ld->playMode = Gate;
     }  
     else if (strEquals(value, PLAYMODE_KEY_OneShot)) {
-        desc->playMode = OneShot;
+        ld->playMode = OneShot;
     } else {
         
     }

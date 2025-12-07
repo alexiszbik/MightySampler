@@ -34,7 +34,7 @@ class WavStream
 
     float data[dataChanCount];
 
-    vector<Sample> samples;
+    vector<LayerPlayer> layerPlayers;
 
   private:
     size_t readHead = 0;
@@ -47,6 +47,9 @@ class WavStream
     FIL  SDFile;
 
     bool isInit = false;
+
+    //debug
+    char strbuff[128];
 
 };
 

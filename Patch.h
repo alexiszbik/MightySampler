@@ -18,6 +18,10 @@ enum EPlayMode {
 
 struct SampleDesc {
     char sampleName[SAMPLE_FILE_NAME_MAX];
+};
+
+struct LayerData
+{
     EPlayMode playMode = OneShot;
 };
 
@@ -31,10 +35,11 @@ public:
 private:
     bool read(FIL& SDFile);
 
-    void loadPlayMode(const char* value, SampleDesc* desc);
+    void loadPlayMode(const char* value, LayerData* ld);
 
 public:
     vector<SampleDesc> sampleDescs;
+    vector<LayerData> layers;
 
 private:
     DisplayManager *display = DisplayManager::GetInstance();
@@ -43,8 +48,10 @@ private:
     static const short bufferLen = 60; //Maybe 60 is a lot, but it's working
     char buffer[bufferLen] = "";
 
-    int currentButtonIndex = -1;
-    SampleDesc* desc = nullptr;
+    short currentSampleIndex = -1;
+    short currentLayerIndex = -1;
+    SampleDesc* currentSampleDesc = nullptr;
+    LayerData* currentLayerData = nullptr;
 
 };
 

@@ -35,17 +35,17 @@ void updateHID() {
     int ledIndex = 0;
     for (auto& buttonState : hid.buttonStates) {
 
-        if (i < sampler.samples.size()) {
+        if (i < sampler.layerPlayers.size()) {
             
             if (buttonState.changed) {
-                sampler.samples[i].SetState(buttonState.state);
+                sampler.layerPlayers[i].SetState(buttonState.state);
                 buttonState.changed = false;
                 if (buttonState.state) {
                     lastSamplerId = i;
                 }
             }
 
-            hid.SetLedState(ledIndex, sampler.samples[i].IsPlaying());
+            hid.SetLedState(ledIndex, sampler.layerPlayers[i].IsPlaying());
         } else {
             hid.SetLedState(ledIndex, false);
         }
@@ -60,7 +60,7 @@ void AudioCallback(const float *in, float *out, size_t size)
 
     updateHID();
 
-    float ratio = sampler.samples[lastSamplerId].getPositionRatio();
+    float ratio = sampler.layerPlayers[lastSamplerId].getPositionRatio();
     string progress = "";
     ratio *= 10.0f;
     if (ratio != 0) {
@@ -78,9 +78,9 @@ void AudioCallback(const float *in, float *out, size_t size)
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
     //for testing only
-    sampler.samples[0].parameters.at(Volume).value = hid.knobValues.at(0);
-    sampler.samples[0].parameters.at(Speed).value = hid.knobValues.at(1);
-    sampler.samples[0].parameters.at(FXSend).value = hid.knobValues.at(2);
+    sampler.layerPlayers[0].parameters.at(Volume).value = hid.knobValues.at(0);
+    sampler.layerPlayers[0].parameters.at(Speed).value = hid.knobValues.at(1);
+    sampler.layerPlayers[0].parameters.at(FXSend).value = hid.knobValues.at(2);
 
     for(size_t i = 0; i < size; i += 2)
     {
@@ -105,8 +105,8 @@ void HandleMidiMessage(MidiEvent m)
             display->Write({strbuff});
 
             int sampleId = m.data[0];
-            if (sampleId < sampler.samples.size()) {
-                sampler.samples[sampleId].SetState(m.data[1] > 0, true);
+            if (sampleId < sampler.layerPlayers.size()) {
+                sampler.layerPlayers[sampleId].SetState(m.data[1] > 0, true);
             }
             break;
         }
@@ -121,8 +121,8 @@ void HandleMidiMessage(MidiEvent m)
             display->Write({strbuff});
 
             int sampleId = m.data[0];
-            if (sampleId < sampler.samples.size()) {
-                sampler.samples[sampleId].SetState(false, true);
+            if (sampleId < sampler.layerPlayers.size()) {
+                sampler.layerPlayers[sampleId].SetState(false, true);
             }
             break;
         }
@@ -149,7 +149,7 @@ void InitMidi()
 
 void onButton(bool isShift) {
     pageIndex = pageIndex + 1;
-    pageIndex = pageIndex % (int)(floor(sampler.samples.size() / 6) + 1);
+    pageIndex = pageIndex % (int)(floor(sampler.layerPlayers.size() / 6) + 1);
     sprintf(strbuff,
             "Shift :%d",
             pageIndex);

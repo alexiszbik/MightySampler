@@ -1,38 +1,38 @@
 #include "Sample.h"
 #include "daisy.h"
 
-Sample::Sample() {
+LayerPlayer::LayerPlayer() {
 }
 
-void Sample::Init(double playingSampleRate) {
+void LayerPlayer::Init(double playingSampleRate) {
     this->playingSampleRate = playingSampleRate;
 }
 
-void Sample::Reset() {
+void LayerPlayer::Reset() {
     isPlaying = false;
     readPos = 0;
 }
 
-const char* Sample::getName() {
+const char* LayerPlayer::getName() {
     return desc->sampleName;
 }
 
-float Sample::getPositionRatio() {
+float LayerPlayer::getPositionRatio() {
     return isPlaying ? (float)readPos/(float)sampleData.sampleSize : 0;
 }
 
-void Sample::SetIsPlaying(bool state) {
+void LayerPlayer::SetIsPlaying(bool state) {
     if (state && !isPlaying) {
         readPos = 0;
     }
     isPlaying = state;
 }
 
-void Sample::SetState(bool state, bool fromMidi) {
+void LayerPlayer::SetState(bool state, bool fromMidi) {
     if (state == previousButtonState)
         return;
 
-    switch (desc->playMode) {
+    switch (layerData->playMode) {
         case Trigger:
             if (fromMidi) {
                 SetIsPlaying(state);
@@ -58,7 +58,7 @@ void Sample::SetState(bool state, bool fromMidi) {
 }
 
 //Table read
-void Sample::TableRead(double index, const size_t tableLength) {
+void LayerPlayer::TableRead(double index, const size_t tableLength) {
 
     const double p = index;
     const double q = floor(p);
@@ -80,7 +80,7 @@ void Sample::TableRead(double index, const size_t tableLength) {
     }
 }
 
-void Sample::Stream()
+void LayerPlayer::Stream()
 {
     double srSpeed = sampleData.sampleRate/playingSampleRate;
     double speed = (double)parameters.at(Speed).value * srSpeed;
