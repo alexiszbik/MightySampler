@@ -102,7 +102,7 @@ void HandleMidiMessage(MidiEvent m)
                     m.channel,
                     m.data[0],
                     m.data[1]);
-            display->Write({strbuff});
+            display->Write(strbuff);
 
             int sampleId = m.data[0];
             if (sampleId < sampler.layerPlayers.size()) {
@@ -118,7 +118,7 @@ void HandleMidiMessage(MidiEvent m)
                     m.channel,
                     m.data[0],
                     m.data[1]);
-            display->Write({strbuff});
+            display->Write(strbuff);
 
             int sampleId = m.data[0];
             if (sampleId < sampler.layerPlayers.size()) {
@@ -134,7 +134,7 @@ void HandleMidiMessage(MidiEvent m)
                     m.channel,
                     m.data[0],
                     m.data[1]);
-            display->Write({strbuff});
+            display->Write(strbuff);
             break;
         }
         default: break;
@@ -153,7 +153,7 @@ void onButton(bool isShift) {
     sprintf(strbuff,
             "Shift :%d",
             pageIndex);
-    display->Write({strbuff});
+    display->Write(strbuff);
 }
 
 int main(void)
@@ -164,7 +164,7 @@ int main(void)
     hw.Init();
 
     display->Init(&hw);
-    display->Write({"YMNK", "SAMPLER"});
+    display->Write("YMNK", "SAMPLER");
 
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
@@ -185,7 +185,7 @@ int main(void)
 
     int d_count = 0;
 
-    display->Write({"YMNK", "READY"});
+    display->Write("YMNK", "READY");
 
     hid.setOnButtonPressed(onButton);
 

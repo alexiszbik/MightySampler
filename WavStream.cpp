@@ -52,13 +52,13 @@ void WavStream::Init(double sampleRate)
     FATFS& SDFatFS = fsi.GetSDFileSystem();
 
     // Mount SD Card
-    display->Write({"Loading SD ..."}, true);
+    display->WriteNow("Loading SD ...");
     f_mount(&SDFatFS, "/", 1);
 
     // Open Dir and scan for files.
     if(f_opendir(&dir, SDPath) != FR_OK)
     {
-        display->Write({"Cannot open Dir ..."}, true);
+        display->WriteNow("Cannot open Dir ...");
         return;
     }
     do
@@ -76,25 +76,25 @@ void WavStream::Init(double sampleRate)
         //Let's load the patch!
         if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
         {
-            display->Write({fn}, true);
+            display->WriteNow(fn);
             patch.loadFile(fn, SDFile);        
         }
     } while(result == FR_OK);
     f_closedir(&dir);
 
-    display->Write({"init", "layers"}, true);
+    display->WriteNow("init", "layers");
 
     for (size_t i = 0; i < patch.layers.size(); i++) {
         layerPlayers.push_back(LayerPlayer(&patch.layers.at(i), &patch));
     }
 
-    display->Write({"loading", "resources"}, true);
+    display->WriteNow("loading", "resources");
     
     // Now we'll go through each file and load the WavInfo.
     //TODO
     for(size_t i = 0; i < layerPlayers.size(); i++)
     {
-        display->Write({"open", patch.sampleDescs[i].sampleName}, true);
+        display->WriteNow("open", patch.sampleDescs[i].sampleName);
 
         if(f_open(&SDFile, patch.sampleDescs[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
@@ -114,7 +114,7 @@ void WavStream::Init(double sampleRate)
 int WavStream::Open(size_t sel)
 {
     SampleDesc* desc = &patch.sampleDescs[sel];
-    display->Write({"loading", desc->sampleName}, true);
+    display->WriteNow("loading", desc->sampleName);
 
     f_open(&SDFile, desc->sampleName, (FA_OPEN_EXISTING | FA_READ));
 
@@ -156,7 +156,7 @@ int WavStream::Open(size_t sel)
     if (header.bits_per_sample != 8
         && header.bits_per_sample != 16 
         && header.bits_per_sample != 32) {
-        display->Write({"unsupported", "bitrate"}, true);
+        display->WriteNow("unsupported", "bitrate");
     }
 
     if (header.format == 1) {

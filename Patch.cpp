@@ -42,8 +42,6 @@ bool Patch::read(FIL& SDFile) {
     std::string main = splitted.at(0);
     
     auto cMain = main.c_str();
-
-    display->Write(splitted, true);
     
     if (splitted.size() == 1) {
         //Why is there an extra caracter here?
