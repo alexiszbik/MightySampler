@@ -58,8 +58,6 @@ private:
     static const short bufferLen = 60; //Maybe 60 is a lot, but it's working
     char buffer[bufferLen] = "";
 
-    short currentSampleIndex = -1;
-    short currentLayerIndex = -1;
     SampleDesc* currentSampleDesc = nullptr;
     LayerData* currentLayerData = nullptr;
 

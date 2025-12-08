@@ -5,6 +5,7 @@
 #define SAMPLE_KEY "SAMPLE"
 #define LAYER_KEY "LAYER"
 #define PLAYMODE_KEY "PLAYMODE"
+#define SAMPLE_ID_KEY "SAMPLE_ID"
 
 #define REVERSE_KEY "REVERSE"
 
@@ -48,11 +49,8 @@ bool Patch::read(FIL& SDFile) {
         main.pop_back();
 
         if (strEquals(cMain, LAYER_KEY)) {
-
-            currentLayerIndex++;
             layers.push_back(LayerData());
-
-            currentLayerData = &layers[currentLayerIndex];
+            currentLayerData = &layers[layers.size() - 1];
         }
         if (strEquals(cMain, REVERSE_KEY)) {
             currentLayerData->isReverse = true;
@@ -66,13 +64,14 @@ bool Patch::read(FIL& SDFile) {
         arg.erase(std::remove(arg.begin(), arg.end(), ' '), arg.cend());
 
         if (strEquals(cMain, SAMPLE_KEY)) {
-
-            currentSampleIndex++;
             sampleDescs.push_back(SampleDesc());
-
-            currentSampleDesc = &sampleDescs[currentSampleIndex];
+            currentSampleDesc = &sampleDescs[sampleDescs.size() - 1];
             strcpy(currentSampleDesc->sampleName, arg.c_str());
-            currentLayerData->sampleId = currentSampleIndex;
+        }
+
+        if (strEquals(cMain, SAMPLE_ID_KEY)) {
+            int splId = str_to_int(arg.c_str());
+            currentLayerData->sampleId = splId;
         }
         
         if (strEquals(cMain, PLAYMODE_KEY) && currentLayerData) {
