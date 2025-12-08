@@ -85,10 +85,7 @@ void WavStream::Init(double sampleRate)
     display->Write({"init", "layers"}, true);
 
     for (size_t i = 0; i < patch.layers.size(); i++) {
-
-        layerPlayers.push_back(LayerPlayer(&patch.layers.at(i)));
-        layerPlayers[i].desc = &patch.sampleDescs.at(i);
-        layerPlayers[i].sampleData = &patch.sampleDescs.at(i).sampleData;
+        layerPlayers.push_back(LayerPlayer(&patch.layers.at(i), &patch));
     }
 
     display->Write({"loading", "resources"}, true);

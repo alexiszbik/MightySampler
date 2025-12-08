@@ -1,8 +1,11 @@
 #include "LayerPlayer.h"
 #include "daisy.h"
 
-LayerPlayer::LayerPlayer(LayerData* layerData) {
+LayerPlayer::LayerPlayer(LayerData* layerData, Patch* patch) {
     this->layerData = layerData;
+    const uint8_t sampleId = layerData->sampleId;
+    desc = &patch->sampleDescs.at(sampleId);
+    sampleData = &desc->sampleData;
 }
 
 void LayerPlayer::Init(double playingSampleRate) {
@@ -17,7 +20,6 @@ void LayerPlayer::Reset() {
     } else {
         readPos = 0;
     }
-    
 }
 
 const char* LayerPlayer::getName() {

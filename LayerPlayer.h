@@ -14,7 +14,7 @@ using namespace daisy;
 class LayerPlayer
 {
 public:
-    LayerPlayer(LayerData* layerData);
+    LayerPlayer(LayerData* layerData, Patch* patch);
 
 public:
     void Init(double playingSampleRate);
@@ -27,9 +27,6 @@ public:
 
     const char* getName();
     float getPositionRatio();
-
-    SampleData* sampleData = nullptr;
-    SampleDesc* desc = nullptr;
 
 private:
     void SetIsPlaying(bool state);
@@ -46,6 +43,8 @@ public:
 
 private:
     LayerData* layerData = nullptr;
+    SampleData* sampleData = nullptr;
+    SampleDesc* desc = nullptr;
     
     bool previousButtonState = false;
 
