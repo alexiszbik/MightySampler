@@ -51,5 +51,7 @@ private:
     double readPos = 0;
     bool isPlaying = false;
     bool isLooping = true;
+
+    double playSpeed;
 };
 

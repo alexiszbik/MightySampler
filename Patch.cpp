@@ -2,16 +2,17 @@
 #include "Tools/StringTools.h"
 #include "Tools/VectorTools.h"
 
-#define SAMPLE_KEY "SAMPLE"
-#define LAYER_KEY "LAYER"
-#define PLAYMODE_KEY "PLAYMODE"
-#define SAMPLE_ID_KEY "SAMPLE_ID"
+static constexpr const char SAMPLE_KEY[]     = "SAMPLE";
+static constexpr const char LAYER_KEY[]      = "LAYER";
+static constexpr const char PLAYMODE_KEY[]   = "PLAYMODE";
+static constexpr const char SAMPLE_ID_KEY[]  = "SAMPLE_ID";
+static constexpr const char PITCH_KEY[]      = "PITCH";
+static constexpr const char REVERSE_KEY[]    = "REVERSE";
 
-#define REVERSE_KEY "REVERSE"
+static constexpr const char PLAYMODE_KEY_Trigger[] = "Trigger";
+static constexpr const char PLAYMODE_KEY_Gate[]    = "Gate";
+static constexpr const char PLAYMODE_KEY_OneShot[] = "OneShot";
 
-#define PLAYMODE_KEY_Trigger "Trigger"
-#define PLAYMODE_KEY_Gate "Gate"
-#define PLAYMODE_KEY_OneShot "OneShot"
 
 Patch::Patch() {
 }
@@ -77,6 +78,11 @@ bool Patch::read(FIL& SDFile) {
         if (strEquals(cMain, PLAYMODE_KEY) && currentLayerData) {
             loadPlayMode(arg.c_str(), currentLayerData);
         }
+
+        if (strEquals(cMain, PITCH_KEY) && currentLayerData) {
+            int pitch = str_to_int(arg.c_str());
+            currentLayerData->pitch = pitch;
+        }
     }
     return true;
 }
@@ -94,3 +100,4 @@ void Patch::loadPlayMode(const char* value, LayerData* ld) {
         
     }
 }
+

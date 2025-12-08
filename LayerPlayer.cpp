@@ -1,5 +1,6 @@
 #include "LayerPlayer.h"
 #include "daisy.h"
+#include "daisysp.h"
 
 LayerPlayer::LayerPlayer(LayerData* layerData, Patch* patch) {
     this->layerData = layerData;
@@ -11,6 +12,12 @@ LayerPlayer::LayerPlayer(LayerData* layerData, Patch* patch) {
 void LayerPlayer::Init(double playingSampleRate) {
     this->playingSampleRate = playingSampleRate;
     Reset();
+    playSpeed = sampleData->sampleRate/playingSampleRate;
+    int pitch = layerData->pitch;
+    if (pitch != 0) {
+        double speedModifier = daisysp::mtof(60 + pitch) / daisysp::mtof(60);
+        playSpeed *= speedModifier;
+    }
 }
 
 void LayerPlayer::Reset() {
@@ -90,8 +97,7 @@ void LayerPlayer::TableRead(double index, size_t tableLength)
 
 void LayerPlayer::Stream()
 {
-    double srSpeed = sampleData->sampleRate/playingSampleRate;
-    double speed = (double)parameters.at(Speed).value * srSpeed;
+    double speed = (double)parameters.at(Speed).value * playSpeed;
 
     if (layerData->isReverse) speed *= -1.;
 

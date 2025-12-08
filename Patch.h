@@ -33,6 +33,7 @@ struct LayerData {
     uint8_t sampleId = 0;
     EPlayMode playMode = OneShot;
     bool isReverse = false;
+    int pitch = 0;
 };
 
 class Patch
