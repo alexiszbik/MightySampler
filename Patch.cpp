@@ -72,6 +72,7 @@ bool Patch::read(FIL& SDFile) {
 
             currentSampleDesc = &sampleDescs[currentSampleIndex];
             strcpy(currentSampleDesc->sampleName, arg.c_str());
+            currentLayerData->sampleId = currentSampleIndex;
         }
         
         if (strEquals(cMain, PLAYMODE_KEY) && currentLayerData) {

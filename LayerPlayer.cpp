@@ -12,7 +12,12 @@ void LayerPlayer::Init(double playingSampleRate) {
 
 void LayerPlayer::Reset() {
     isPlaying = false;
-    readPos = 0;
+    if (layerData->isReverse) {
+        readPos = desc->sampleData.sampleSize - 1;
+    } else {
+        readPos = 0;
+    }
+    
 }
 
 const char* LayerPlayer::getName() {
@@ -25,7 +30,7 @@ float LayerPlayer::getPositionRatio() {
 
 void LayerPlayer::SetIsPlaying(bool state) {
     if (state && !isPlaying) {
-        readPos = 0;
+        Reset();
     }
     isPlaying = state;
 }
@@ -59,29 +64,6 @@ void LayerPlayer::SetState(bool state, bool fromMidi) {
     previousButtonState = state;
 }
 
-//Table read
-/*void LayerPlayer::TableRead(double index, const size_t tableLength) {
-
-    const double p = index;
-    const double q = floor(p);
-    const double r = p - q;
-
-    int nextIndex = q + 1;
-    if (nextIndex >= (int)tableLength) {
-        nextIndex = 0;
-    } else if (nextIndex < 0) {
-        nextIndex = (tableLength - 1);
-    }
-
-    for (uint8_t channel = 0; channel < dataChanCount; channel++) {
-        uint8_t channelStride = channel % sampleData->sampleChanCount;
-        data[channel] = (1.0 - r) * s162f(sampleData->data[((int)q) * sampleData->sampleChanCount + channelStride]) + (r * s162f(sampleData->data[nextIndex * sampleData->sampleChanCount + channelStride]));
-        
-        //LOFI reading, for later
-        //data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
-    }
-}*/
-
 void LayerPlayer::TableRead(double index, size_t tableLength)
 {
     const int q = (int)index;   // do we need floor ? cause index >= 0
@@ -111,6 +93,8 @@ void LayerPlayer::Stream()
 
     if (layerData->isReverse) speed *= -1.;
 
+    size_t sampleSize = sampleData->sampleSize;
+
     float volume = parameters.at(Volume).value;
     volume*=volume;
 
@@ -120,7 +104,7 @@ void LayerPlayer::Stream()
         } 
     } else {
 
-        TableRead(readPos, sampleData->sampleSize);
+        TableRead(/*(layerData->isReverse ? sampleSize : 0) -*/readPos, sampleSize);
 
         for (uint8_t c = 0; c < dataChanCount; c++) {
             data[c] *= volume;
@@ -129,7 +113,7 @@ void LayerPlayer::Stream()
         readPos += speed;
 
         if (speed > 0) {
-            if (readPos >= sampleData->sampleSize) {
+            if (readPos >= sampleSize) {
                 if (isLooping) {
                     readPos = readPos - trunc(readPos);
                 } else {
@@ -139,7 +123,7 @@ void LayerPlayer::Stream()
         } else {
             if (readPos < 0) {
                 if (isLooping) {
-                    readPos += (sampleData->sampleSize - 1);
+                    readPos += (sampleSize - 1);
                 } else {
                     Reset();
                 }

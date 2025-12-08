@@ -1,28 +1,44 @@
 
+LAYER
 SAMPLE beat.wav
-SAMPLE shake.wav
-SAMPLE c64.wav
-SAMPLE guitar.wav
-SAMPLE pad.wav
-SAMPLE down.wav
-SAMPLE sliced.wav
-SAMPLE dha.wav
+PLAYMODE Trigger
+REVERSE
 
 LAYER
-PLAYMODE Trigger
-REVERSE
-LAYER
+SAMPLE shake.wav
 PLAYMODE Gate
 REVERSE
+
 LAYER
+SAMPLE c64.wav
 PLAYMODE OneShot
+
 LAYER
+SAMPLE guitar.wav
 PLAYMODE Trigger
+
 LAYER
+SAMPLE guitar.wav
+PLAYMODE Gate
+REVERSE
+
+LAYER
+SAMPLE pad.wav
 PLAYMODE Trigger
+
 LAYER
+SAMPLE down.wav
+PLAYMODE Gate
+
+LAYER
+SAMPLE sliced.wav
+PLAYMODE Gate
+
+LAYER
+SAMPLE dha.wav
 PLAYMODE OneShot
+
 LAYER
-PLAYMODE Trigger
-LAYER
+SAMPLE dha.wav
 PLAYMODE OneShot
+REVERSE

@@ -30,6 +30,7 @@ struct SampleDesc {
 };
 
 struct LayerData {
+    uint8_t sampleId = 0;
     EPlayMode playMode = OneShot;
     bool isReverse = false;
 };
