@@ -31,6 +31,7 @@ struct SampleDesc {
 
 struct LayerData {
     EPlayMode playMode = OneShot;
+    bool isReverse = false;
 };
 
 class Patch

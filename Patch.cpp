@@ -6,6 +6,8 @@
 #define LAYER_KEY "LAYER"
 #define PLAYMODE_KEY "PLAYMODE"
 
+#define REVERSE_KEY "REVERSE"
+
 #define PLAYMODE_KEY_Trigger "Trigger"
 #define PLAYMODE_KEY_Gate "Gate"
 #define PLAYMODE_KEY_OneShot "OneShot"
@@ -51,6 +53,9 @@ bool Patch::read(FIL& SDFile) {
             layers.push_back(LayerData());
 
             currentLayerData = &layers[currentLayerIndex];
+        }
+        if (strEquals(cMain, REVERSE_KEY)) {
+            currentLayerData->isReverse = true;
         }
     }
 

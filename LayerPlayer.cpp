@@ -60,7 +60,7 @@ void LayerPlayer::SetState(bool state, bool fromMidi) {
 }
 
 //Table read
-void LayerPlayer::TableRead(double index, const size_t tableLength) {
+/*void LayerPlayer::TableRead(double index, const size_t tableLength) {
 
     const double p = index;
     const double q = floor(p);
@@ -80,12 +80,36 @@ void LayerPlayer::TableRead(double index, const size_t tableLength) {
         //LOFI reading, for later
         //data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
     }
+}*/
+
+void LayerPlayer::TableRead(double index, size_t tableLength)
+{
+    const int q = (int)index;   // do we need floor ? cause index >= 0
+    const double r = index - q;
+
+    const int nextIndex = (q + 1) % tableLength;
+    const int sampleChanCount = sampleData->sampleChanCount;
+
+    for (uint8_t channel = 0; channel < dataChanCount; ++channel)
+    {
+        const uint8_t channelStride = channel % sampleChanCount;
+
+        const float a = s162f(sampleData->data[q * sampleChanCount + channelStride]);
+        const float b = s162f(sampleData->data[nextIndex * sampleChanCount + channelStride]);
+
+        data[channel] = (1.0 - r) * a + r * b;
+
+        // LOFI reading, for later
+        // data[channel] = s162f(sampleData[((int)q) * chanCount + channelStride]);
+    }
 }
 
 void LayerPlayer::Stream()
 {
     double srSpeed = sampleData->sampleRate/playingSampleRate;
     double speed = (double)parameters.at(Speed).value * srSpeed;
+
+    if (layerData->isReverse) speed *= -1.;
 
     float volume = parameters.at(Volume).value;
     volume*=volume;
