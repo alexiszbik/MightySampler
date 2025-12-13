@@ -9,7 +9,7 @@ LayerPlayer.cpp \
 Patch.cpp \
 HID.cpp \
 Button.cpp \
-DaisyYMNK/DisplayManager.cpp 
+DaisyYMNK/Display/DisplayManager.cpp 
 
 # Library Locations
 LIBDAISY_DIR = libdaisy

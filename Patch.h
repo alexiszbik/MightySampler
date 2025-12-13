@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "fatfs.h"
-#include "DaisyYMNK/DisplayManager.h"
+#include "DaisyYMNK/DaisyYMNK.h"
 
 #define SAMPLE_FILE_NAME_MAX 64
 

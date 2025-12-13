@@ -13,7 +13,7 @@
 #include "HID.h"
 #include "daisy_pod.h"
 
-#include "DaisyYMNK/DisplayManager.h"
+#include "DaisyYMNK/DaisyYMNK.h"
 
 using namespace daisy;
 

@@ -2,7 +2,7 @@
 
 #include "daisy_core.h"
 #include "util/wav_format.h"
-#include "DaisyYMNK/DisplayManager.h"
+#include "DaisyYMNK/DaisyYMNK.h"
 
 #include "Patch.h"
 #include "SamplerParameters.h"
