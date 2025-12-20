@@ -13,6 +13,8 @@
 #include "HID.h"
 #include "daisy_pod.h"
 
+#include "BiquadFilter.h"
+
 #include "DaisyYMNK/DaisyYMNK.h"
 
 using namespace daisy;
@@ -29,6 +31,9 @@ MidiUartHandler midi;
 int lastSamplerId = 0;
 int pageIndex = 0;
 char strbuff[128];
+
+BiquadFilter lpFilter[2];
+BiquadFilter hpFilter[2];
 
 void updateHID() {
     int i = pageIndex*6;
@@ -78,16 +83,32 @@ void AudioCallback(const float *in, float *out, size_t size)
     //display->Write({sampler.sample[lastSamplerId].getName(), progress.c_str()});
 
     //for testing only
-    sampler.layerPlayers[0].parameters.at(Volume).value = hid.knobValues.at(0);
-    sampler.layerPlayers[0].parameters.at(Speed).value = hid.knobValues.at(1);
-    sampler.layerPlayers[0].parameters.at(FXSend).value = hid.knobValues.at(2);
+    float volume = hid.knobValues.at(0);
+    float speed = hid.knobValues.at(1);
+    uint8_t k = sampler.layerPlayers.size();
+    while(k--) {
+        sampler.layerPlayers[k].parameters.at(Volume).value = volume;
+        sampler.layerPlayers[k].parameters.at(Speed).value = speed;
+    }
+
+    float lpFreq = hid.knobValues.at(2);
+    lpFreq = daisysp::mtof(lpFreq * 117 + 10);
+
+    float hpFreq = hid.knobValues.at(3);
+    hpFreq = daisysp::mtof(hpFreq * 117 + 10);
+
+    for (uint8_t chan = 0; chan < 2; chan ++) {
+        lpFilter[chan].SetLowpass(lpFreq, 0.5);
+        hpFilter[chan].SetHighpass(hpFreq, 0.5);
+    }
 
     for(size_t i = 0; i < size; i += 2)
     {
         sampler.Stream();
 
-        out[i] = sampler.data[0] * 0.5f;
-        out[i + 1] = sampler.data[1] * 0.5f;
+        for (uint8_t chan = 0; chan < 2; chan ++) {
+            out[i + chan] = lpFilter[chan].Process(hpFilter[chan].Process(sampler.data[chan] * 0.5f));
+        }
     }
 }
 
@@ -171,8 +192,14 @@ int main(void)
     sd_cfg.speed = SdmmcHandler::Speed::FAST;
     sd_cfg.width = SdmmcHandler::BusWidth::BITS_4;
     sdcard.Init(sd_cfg);
+
+    float sr = hw.AudioSampleRate();
     
-    sampler.Init(hw.AudioSampleRate());
+    sampler.Init(sr);
+    for (uint8_t chan = 0; chan < 2; chan++) {
+        lpFilter[chan].Init(sr);
+        hpFilter[chan].Init(sr);
+    }
 
     hid.Init(hw);
 

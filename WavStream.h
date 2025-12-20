@@ -31,9 +31,7 @@ class WavStream
     void Stream();
 
     static constexpr uint8_t dataChanCount = 2;
-
     float data[dataChanCount];
-
     vector<LayerPlayer> layerPlayers;
 
   private:
