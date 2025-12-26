@@ -110,7 +110,7 @@ void WavStream::Init(double sampleRate)
 
     isInit = true;
 }
-
+/*
 int WavStream::Open(size_t sel)
 {
     SampleDesc* desc = &patch.sampleDescs[sel];
@@ -216,7 +216,125 @@ int WavStream::Open(size_t sel)
     f_close(&SDFile);
 
     return 0;
+}*/
+
+int WavStream::Open(size_t sel)
+{
+    SampleDesc* desc = &patch.sampleDescs[sel];
+    display->WriteNow("loading", desc->sampleName);
+
+    if(f_open(&SDFile, desc->sampleName, (FA_OPEN_EXISTING | FA_READ)) != FR_OK)
+        return -1;
+
+    UINT br = 0;
+    unsigned char buf4[4];
+    unsigned char buf2[2];
+
+    // ---- RIFF header ----
+    f_read(&SDFile, buf4, 4, &br); // "RIFF"
+    f_read(&SDFile, buf4, 4, &br); // size
+    f_read(&SDFile, buf4, 4, &br); // "WAVE"
+
+    // ---- fmt chunk ----
+    f_read(&SDFile, buf4, 4, &br); // "fmt "
+    f_read(&SDFile, buf4, 4, &br);
+    uint32_t fmtlen = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, buf2, 2, &br);
+    uint16_t format = end_buf2_to_int(buf2);
+
+    f_read(&SDFile, buf2, 2, &br);
+    uint16_t chan_ct = end_buf2_to_int(buf2);
+
+    f_read(&SDFile, buf4, 4, &br);
+    uint32_t sample_rate = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, buf4, 4, &br);
+    uint32_t byte_rate = end_buf4_to_int(buf4);
+
+    f_read(&SDFile, buf2, 2, &br);
+    uint16_t block_align = end_buf2_to_int(buf2);
+
+    f_read(&SDFile, buf2, 2, &br);
+    uint16_t bits_per_sample = end_buf2_to_int(buf2);
+
+    // Skip éventuel surplus du fmt
+    if(fmtlen > 16)
+        f_lseek(&SDFile, f_tell(&SDFile) + (fmtlen - 16));
+
+    if(bits_per_sample != 8 && bits_per_sample != 16 && bits_per_sample != 32)
+    {
+        display->WriteNow("unsupported", "bit depth");
+        f_close(&SDFile);
+        return -1;
+    }
+
+    // ---- Scan chunks until "data" ----
+    uint32_t data_size = 0;
+
+    while(true)
+    {
+        if(f_read(&SDFile, buf4, 4, &br) != FR_OK || br < 4)
+            break;
+
+        char chunk_id[4];
+        memcpy(chunk_id, buf4, 4);
+
+        f_read(&SDFile, buf4, 4, &br);
+        uint32_t chunk_size = end_buf4_to_int(buf4);
+
+        if(memcmp(chunk_id, "data", 4) == 0)
+        {
+            data_size = chunk_size;
+            break;
+        }
+        else
+        {
+            uint32_t skip = chunk_size + (chunk_size & 1);
+            f_lseek(&SDFile, f_tell(&SDFile) + skip);
+        }
+    }
+
+    if(data_size == 0)
+    {
+        display->WriteNow("no data", "chunk");
+        f_close(&SDFile);
+        return -1;
+    }
+
+    // ---- Fill sample desc ----
+    uint32_t sample_ct = data_size / block_align;
+
+    desc->sampleData.sampleSize      = sample_ct;
+    desc->sampleData.sampleChanCount = chan_ct;
+    desc->sampleData.sampleRate      = (double)sample_rate;
+
+    // ---- Read PCM data ----
+    if(format == 1) // PCM
+    {
+        UINT bytesread = 0;
+        size_t framesRead = 0;
+        const UINT bytesPerFrame = block_align;
+
+        while(!f_eof(&SDFile))
+        {
+            UINT bytesToRead = 128 * bytesPerFrame;
+            f_read(&SDFile,
+                   (uint8_t*)&bigBuff[readHead + framesRead],
+                   bytesToRead,
+                   &bytesread);
+
+            framesRead += bytesread / bytesPerFrame;
+        }
+
+        desc->sampleData.data = &bigBuff[readHead];
+        readHead += framesRead;
+    }
+
+    f_close(&SDFile);
+    return 0;
 }
+
 
 int WavStream::Close()
 {
