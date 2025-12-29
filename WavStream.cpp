@@ -4,7 +4,7 @@
 
 #include "Patch.h"
 
-DSY_SDRAM_BSS int16_t bigBuff[44100*40];
+DSY_SDRAM_BSS int16_t bigBuff[44100*60];
 
 using namespace daisy;
 
@@ -92,9 +92,12 @@ void WavStream::Init(double sampleRate)
     
     // Now we'll go through each file and load the WavInfo.
     //TODO
-    for(size_t i = 0; i < layerPlayers.size(); i++)
+    for(size_t i = 0; i < patch.sampleDescs.size(); i++)
     {
         display->WriteNow("open", patch.sampleDescs[i].sampleName);
+
+         //System::Delay(500);
+        
 
         if(f_open(&SDFile, patch.sampleDescs[i].sampleName, (FA_OPEN_EXISTING | FA_READ))
            == FR_OK)
@@ -110,7 +113,7 @@ void WavStream::Init(double sampleRate)
 
     isInit = true;
 }
-/*
+
 int WavStream::Open(size_t sel)
 {
     SampleDesc* desc = &patch.sampleDescs[sel];
@@ -216,8 +219,8 @@ int WavStream::Open(size_t sel)
     f_close(&SDFile);
 
     return 0;
-}*/
-
+}
+/*
 int WavStream::Open(size_t sel)
 {
     SampleDesc* desc = &patch.sampleDescs[sel];
@@ -232,65 +235,57 @@ int WavStream::Open(size_t sel)
 
     // ---- RIFF header ----
     f_read(&SDFile, buf4, 4, &br); // "RIFF"
-    f_read(&SDFile, buf4, 4, &br); // size
+    f_read(&SDFile, buf4, 4, &br); // RIFF size
     f_read(&SDFile, buf4, 4, &br); // "WAVE"
 
-    // ---- fmt chunk ----
-    f_read(&SDFile, buf4, 4, &br); // "fmt "
-    f_read(&SDFile, buf4, 4, &br);
-    uint32_t fmtlen = end_buf4_to_int(buf4);
-
-    f_read(&SDFile, buf2, 2, &br);
-    uint16_t format = end_buf2_to_int(buf2);
-
-    f_read(&SDFile, buf2, 2, &br);
-    uint16_t chan_ct = end_buf2_to_int(buf2);
-
-    f_read(&SDFile, buf4, 4, &br);
-    uint32_t sample_rate = end_buf4_to_int(buf4);
-
-    f_read(&SDFile, buf4, 4, &br);
-    uint32_t byte_rate = end_buf4_to_int(buf4);
-
-    f_read(&SDFile, buf2, 2, &br);
-    uint16_t block_align = end_buf2_to_int(buf2);
-
-    f_read(&SDFile, buf2, 2, &br);
-    uint16_t bits_per_sample = end_buf2_to_int(buf2);
-
-    // Skip éventuel surplus du fmt
-    if(fmtlen > 16)
-        f_lseek(&SDFile, f_tell(&SDFile) + (fmtlen - 16));
-
-    if(bits_per_sample != 8 && bits_per_sample != 16 && bits_per_sample != 32)
-    {
-        display->WriteNow("unsupported", "bit depth");
-        f_close(&SDFile);
-        return -1;
-    }
-
-    // ---- Scan chunks until "data" ----
+    uint16_t format = 0;
+    uint16_t chan_ct = 0;
+    uint32_t sample_rate = 0;
+    uint16_t block_align = 0;
+    uint16_t bits_per_sample = 0;
     uint32_t data_size = 0;
 
+    // ---- Scan all chunks ----
     while(true)
     {
-        if(f_read(&SDFile, buf4, 4, &br) != FR_OK || br < 4)
-            break;
-
-        char chunk_id[4];
-        memcpy(chunk_id, buf4, 4);
-
+        char chunk_id[4] = {0};
+        if(f_read(&SDFile, chunk_id, 4, &br) != FR_OK || br < 4) break;
         f_read(&SDFile, buf4, 4, &br);
         uint32_t chunk_size = end_buf4_to_int(buf4);
 
-        if(memcmp(chunk_id, "data", 4) == 0)
+        if(memcmp(chunk_id, "fmt ", 4) == 0)
+        {
+            // fmt chunk
+            f_read(&SDFile, buf2, 2, &br);
+            format = end_buf2_to_int(buf2);
+
+            f_read(&SDFile, buf2, 2, &br);
+            chan_ct = end_buf2_to_int(buf2);
+
+            f_read(&SDFile, buf4, 4, &br);
+            sample_rate = end_buf4_to_int(buf4);
+
+            f_read(&SDFile, buf4, 4, &br);
+            uint32_t byte_rate = end_buf4_to_int(buf4);
+
+            f_read(&SDFile, buf2, 2, &br);
+            block_align = end_buf2_to_int(buf2);
+
+            f_read(&SDFile, buf2, 2, &br);
+            bits_per_sample = end_buf2_to_int(buf2);
+
+            if(chunk_size > 16)
+                f_lseek(&SDFile, f_tell(&SDFile) + (chunk_size - 16));
+        }
+        else if(memcmp(chunk_id, "data", 4) == 0)
         {
             data_size = chunk_size;
-            break;
+            break; // found data
         }
         else
         {
-            uint32_t skip = chunk_size + (chunk_size & 1);
+            // Skip any other chunk (smpl, LIST, cue , fact, etc.)
+            uint32_t skip = chunk_size + (chunk_size & 1); // align to 2 bytes
             f_lseek(&SDFile, f_tell(&SDFile) + skip);
         }
     }
@@ -302,9 +297,15 @@ int WavStream::Open(size_t sel)
         return -1;
     }
 
+    if(bits_per_sample != 8 && bits_per_sample != 16 && bits_per_sample != 32)
+    {
+        display->WriteNow("unsupported", "bit depth");
+        f_close(&SDFile);
+        return -1;
+    }
+
     // ---- Fill sample desc ----
     uint32_t sample_ct = data_size / block_align;
-
     desc->sampleData.sampleSize      = sample_ct;
     desc->sampleData.sampleChanCount = chan_ct;
     desc->sampleData.sampleRate      = (double)sample_rate;
@@ -318,7 +319,7 @@ int WavStream::Open(size_t sel)
 
         while(!f_eof(&SDFile))
         {
-            UINT bytesToRead = 128 * bytesPerFrame;
+            UINT bytesToRead = 128 * bytesPerFrame; // read 128 frames at a time
             f_read(&SDFile,
                    (uint8_t*)&bigBuff[readHead + framesRead],
                    bytesToRead,
@@ -334,7 +335,7 @@ int WavStream::Open(size_t sel)
     f_close(&SDFile);
     return 0;
 }
-
+*/
 
 int WavStream::Close()
 {
