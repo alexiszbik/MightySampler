@@ -4,6 +4,7 @@
 #include "daisy_core.h"
 #include "util/wav_format.h"
 #include "LayerPlayer.h"
+#include "SDPatchReader.h"
 #include "DaisyYMNK/DaisyYMNK.h"
 
 namespace daisy
@@ -38,6 +39,7 @@ class WavStream
     size_t readHead = 0;
 
     Patch patch;
+    SDPatchReader patchReader = SDPatchReader(&patch);
 
     DisplayManager *display = DisplayManager::GetInstance();
 

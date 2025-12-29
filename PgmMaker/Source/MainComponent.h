@@ -35,7 +35,8 @@ private:
     juce::TabbedComponent tabbedComponent;
     LayerDataListBox layerDataListBox;
     SampleDescListBox sampleDescListBox;
-    PatchReader patchReader;
+    Patch patch;
+    PatchReader patchReader = PatchReader(&patch);
     SampleManager sampleManager;
     SamplePlayer samplePlayer;
     juce::String currentlyPlayingSample;

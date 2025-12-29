@@ -61,11 +61,11 @@ MainComponent::MainComponent()
             }
             
             // Update sample descriptions with loaded audio data
-            sampleManager.updateSampleDescs(&patchReader.sampleDescs);
+            sampleManager.updateSampleDescs(&patch.sampleDescs);
             
             // Update the list boxes with the loaded data
-            layerDataListBox.setData(&patchReader.layers, &patchReader.sampleDescs);
-            sampleDescListBox.setSampleDescs(&patchReader.sampleDescs);
+            layerDataListBox.setData(&patch.layers, &patch.sampleDescs);
+            sampleDescListBox.setSampleDescs(&patch.sampleDescs);
             
             // Set up the play callback
             sampleDescListBox.setPlayCallback([this](const juce::String& sampleName) {

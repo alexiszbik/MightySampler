@@ -77,18 +77,20 @@ void WavStream::Init(double sampleRate)
         if(strstr(fn, ".ymnk") || strstr(fn, ".YMNK"))
         {
             display->WriteNow(fn);
-            patch.loadFile(fn, SDFile);        
+            patchReader.loadFile(fn, SDFile);        
         }
     } while(result == FR_OK);
     f_closedir(&dir);
 
     display->WriteNow("init", "layers");
+    System::Delay(500);
 
     for (size_t i = 0; i < patch.layers.size(); i++) {
         layerPlayers.push_back(LayerPlayer(&patch.layers.at(i), &patch));
     }
 
     display->WriteNow("loading", "resources");
+    System::Delay(500);
     
     // Now we'll go through each file and load the WavInfo.
     //TODO

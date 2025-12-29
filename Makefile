@@ -6,9 +6,10 @@ CPP_SOURCES = \
 MightySampler.cpp \
 WavStream.cpp \
 LayerPlayer.cpp \
-Patch.cpp \
 HID.cpp \
 Button.cpp \
+PatchReader.cpp \
+SDPatchReader.cpp \
 DaisyYMNK/Display/DisplayManager.cpp 
 
 # Library Locations

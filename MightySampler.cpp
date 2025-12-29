@@ -114,6 +114,10 @@ void AudioCallback(const float *in, float *out, size_t size)
 
 void HandleMidiMessage(MidiEvent m)
 {
+    if (m.channel != (8 - 1)) {
+        return;
+    }
+
     switch(m.type)
     {
         case NoteOn:
