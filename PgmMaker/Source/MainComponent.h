@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "LayerDataListBox.h"
+#include "SampleDescListBox.h"
 
 //==============================================================================
 /*
@@ -27,7 +28,9 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
+    juce::TabbedComponent tabbedComponent;
     LayerDataListBox layerDataListBox;
+    SampleDescListBox sampleDescListBox;
     PatchReader patchReader;
 
 

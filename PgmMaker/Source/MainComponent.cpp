@@ -3,6 +3,7 @@
 
 //==============================================================================
 MainComponent::MainComponent()
+    : tabbedComponent(juce::TabbedButtonBar::TabsAtTop)
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -21,9 +22,10 @@ MainComponent::MainComponent()
         setAudioChannels (2, 2);
     }
     
-    //--------------
+    tabbedComponent.addTab("Samples", juce::Colours::lightgrey, &sampleDescListBox, false);
+    tabbedComponent.addTab("Layers", juce::Colours::lightgrey, &layerDataListBox, false);
     
-    addAndMakeVisible(layerDataListBox);
+    addAndMakeVisible(tabbedComponent);
     
     auto docsDir = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory);
     auto samplerDir = docsDir.getChildFile ("sampler");
@@ -41,8 +43,9 @@ MainComponent::MainComponent()
                 }
             }
             
-            // Update the list box with the loaded layers
+            // Update the list boxes with the loaded data
             layerDataListBox.setLayers(&patchReader.layers);
+            sampleDescListBox.setSampleDescs(&patchReader.sampleDescs);
         }
 
     } else {
@@ -103,5 +106,5 @@ void MainComponent::resized()
     // update their positions.
     
     auto bounds = getLocalBounds();
-    layerDataListBox.setBounds(bounds);
+    tabbedComponent.setBounds(bounds);
 }
