@@ -15,6 +15,8 @@ public:
     ~SampleDescListBox() override = default;
     
     void setSampleDescs(std::vector<SampleDesc>* sampleDescs);
+    void setPlayCallback(std::function<bool(const juce::String&)> callback);
+    void updateButtonStates(const juce::String& currentlyPlayingSample);
     void updateContent();
     void resized() override;
     

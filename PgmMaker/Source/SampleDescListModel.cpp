@@ -17,17 +17,37 @@ void PlayButtonComponent::resized()
 
 void PlayButtonComponent::buttonClicked(juce::Button* button)
 {
-    if (button == &playButton && sampleDesc != nullptr)
+    if (button == &playButton && sampleDesc != nullptr && playCallback)
     {
-        // TODO: Implement play functionality
         juce::String sampleName(sampleDesc->sampleName);
-        std::cout << "Playing sample: " << sampleName << std::endl;
+        bool isNowPlaying = playCallback(sampleName);
+        updateButtonState(isNowPlaying);
     }
 }
 
 void PlayButtonComponent::setSampleDesc(const SampleDesc* desc)
 {
     sampleDesc = desc;
+    currentlyPlaying = false;
+    updateButtonState(false);
+}
+
+void PlayButtonComponent::setPlayCallback(std::function<bool(const juce::String&)> callback)
+{
+    playCallback = callback;
+}
+
+void PlayButtonComponent::updateButtonState(bool isPlaying)
+{
+    currentlyPlaying = isPlaying;
+    playButton.setButtonText(isPlaying ? "Stop" : "Play");
+}
+
+juce::String PlayButtonComponent::getSampleName() const
+{
+    if (sampleDesc != nullptr)
+        return juce::String(sampleDesc->sampleName);
+    return juce::String();
 }
 
 //==============================================================================
@@ -115,6 +135,7 @@ juce::Component* SampleDescListModel::refreshComponentForCell(int rowNumber, int
     }
     
     component->setSampleDesc(&(*sampleDescs)[rowNumber]);
+    component->setPlayCallback(playCallback);
     
     return component;
 }
@@ -123,5 +144,25 @@ void SampleDescListModel::setSampleDescs(std::vector<SampleDesc>* newSampleDescs
 {
     sampleDescs = newSampleDescs;
     playButtonComponents.clear();
+}
+
+void SampleDescListModel::setPlayCallback(std::function<bool(const juce::String&)> callback)
+{
+    playCallback = callback;
+    // Update all existing button components
+    for (auto* component : playButtonComponents)
+    {
+        component->setPlayCallback(playCallback);
+    }
+}
+
+void SampleDescListModel::updateButtonStates(const juce::String& currentlyPlayingSample)
+{
+    for (auto* component : playButtonComponents)
+    {
+        juce::String sampleName = component->getSampleName();
+        bool isPlaying = (sampleName == currentlyPlayingSample && !sampleName.isEmpty());
+        component->updateButtonState(isPlaying);
+    }
 }
 

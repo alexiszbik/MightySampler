@@ -23,6 +23,16 @@ void SampleDescListBox::setSampleDescs(std::vector<SampleDesc>* sampleDescs)
     tableListBox.updateContent();
 }
 
+void SampleDescListBox::setPlayCallback(std::function<bool(const juce::String&)> callback)
+{
+    model.setPlayCallback(callback);
+}
+
+void SampleDescListBox::updateButtonStates(const juce::String& currentlyPlayingSample)
+{
+    model.updateButtonStates(currentlyPlayingSample);
+}
+
 void SampleDescListBox::updateContent()
 {
     tableListBox.updateContent();

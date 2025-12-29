@@ -3,6 +3,8 @@
 #include <JuceHeader.h>
 #include "LayerDataListBox.h"
 #include "SampleDescListBox.h"
+#include "SampleManager.h"
+#include "SamplePlayer.h"
 
 //==============================================================================
 /*
@@ -32,6 +34,11 @@ private:
     LayerDataListBox layerDataListBox;
     SampleDescListBox sampleDescListBox;
     PatchReader patchReader;
+    SampleManager sampleManager;
+    SamplePlayer samplePlayer;
+    juce::String currentlyPlayingSample;
+    
+    bool onPlaySample(const juce::String& sampleName);
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

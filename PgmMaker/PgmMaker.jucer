@@ -3,7 +3,16 @@
 <JUCERPROJECT id="owWakJ" name="PgmMaker" projectType="guiapp" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="VvlYnD" name="PgmMaker">
+    <GROUP id="{BE3FD020-AA09-19B5-12B3-9BAB75D59B9F}" name="AudioFile">
+      <FILE id="p8bSEI" name="AudioFile.h" compile="0" resource="0" file="AudioFile/AudioFile.h"/>
+    </GROUP>
     <GROUP id="{6591C6EC-7AB7-5C0D-E817-5D8E7B8D825C}" name="Source">
+      <FILE id="LemV4I" name="SampleManager.cpp" compile="1" resource="0"
+            file="Source/SampleManager.cpp"/>
+      <FILE id="bPUeAn" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
+      <FILE id="tvV2jb" name="SamplePlayer.cpp" compile="1" resource="0"
+            file="Source/SamplePlayer.cpp"/>
+      <FILE id="HaaW8c" name="SamplePlayer.h" compile="0" resource="0" file="Source/SamplePlayer.h"/>
       <FILE id="u4rQE8" name="LayerDataListBox.cpp" compile="1" resource="0"
             file="Source/LayerDataListBox.cpp"/>
       <FILE id="dZW62D" name="LayerDataListBox.h" compile="0" resource="0"

@@ -43,9 +43,29 @@ MainComponent::MainComponent()
                 }
             }
             
+            // Load all samples into memory
+            juce::String samplerPath = samplerDir.getFullPathName();
+            
+            if (sampleManager.loadAllSamples(samplerPath))
+            {
+                std::cout << "SampleManager: Successfully loaded " << sampleManager.getNumLoadedSamples() << " samples" << std::endl;
+            }
+            else
+            {
+                std::cout << "SampleManager: Some samples failed to load" << std::endl;
+            }
+            
+            // Update sample descriptions with loaded audio data
+            sampleManager.updateSampleDescs(&patchReader.sampleDescs);
+            
             // Update the list boxes with the loaded data
             layerDataListBox.setData(&patchReader.layers, &patchReader.sampleDescs);
             sampleDescListBox.setSampleDescs(&patchReader.sampleDescs);
+            
+            // Set up the play callback
+            sampleDescListBox.setPlayCallback([this](const juce::String& sampleName) {
+                return onPlaySample(sampleName);
+            });
         }
 
     } else {
@@ -69,6 +89,16 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     // but be careful - it will be called on the audio thread, not the GUI thread.
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
+    
+    samplePlayer.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    
+    // Set callback for when playback stops
+    samplePlayer.setPlaybackStoppedCallback([this]() {
+        juce::MessageManager::callAsync([this]() {
+            currentlyPlayingSample = juce::String();
+            sampleDescListBox.updateButtonStates(juce::String());
+        });
+    });
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -76,10 +106,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     // Your audio-processing code goes here!
 
     // For more details, see the help for AudioProcessor::getNextAudioBlock()
-
-    // Right now we are not producing any data, in which case we need to clear the buffer
-    // (to prevent the output of random noise)
-    bufferToFill.clearActiveBufferRegion();
+    
+    // Play the sample if one is playing
+    samplePlayer.getNextAudioBlock(bufferToFill);
 }
 
 void MainComponent::releaseResources()
@@ -88,6 +117,47 @@ void MainComponent::releaseResources()
     // restarted due to a setting change.
 
     // For more details, see the help for AudioProcessor::releaseResources()
+    
+    samplePlayer.releaseResources();
+}
+
+//==============================================================================
+bool MainComponent::onPlaySample(const juce::String& sampleName)
+{
+    // If clicking on the same sample that's playing, stop it
+    if (currentlyPlayingSample == sampleName && samplePlayer.isPlaying())
+    {
+        samplePlayer.stop();
+        currentlyPlayingSample = juce::String();
+        sampleDescListBox.updateButtonStates(juce::String());
+        std::cout << "Stopped sample: " << sampleName << std::endl;
+        return false;
+    }
+    
+    // Stop current sample if playing a different one
+    if (samplePlayer.isPlaying())
+    {
+        samplePlayer.stop();
+    }
+    
+    AudioFile<float>* audioFile = sampleManager.getSample(sampleName);
+    
+    if (audioFile != nullptr)
+    {
+        samplePlayer.setSample(audioFile);
+        samplePlayer.start();
+        currentlyPlayingSample = sampleName;
+        sampleDescListBox.updateButtonStates(sampleName);
+        std::cout << "Playing sample: " << sampleName << std::endl;
+        return true;
+    }
+    else
+    {
+        std::cout << "Sample not found: " << sampleName << std::endl;
+        currentlyPlayingSample = juce::String();
+        sampleDescListBox.updateButtonStates(juce::String());
+        return false;
+    }
 }
 
 //==============================================================================

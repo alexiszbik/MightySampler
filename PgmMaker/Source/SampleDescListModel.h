@@ -19,11 +19,16 @@ public:
     void buttonClicked(juce::Button* button) override;
     
     void setSampleDesc(const SampleDesc* sampleDesc);
+    void setPlayCallback(std::function<bool(const juce::String&)> callback);
+    void updateButtonState(bool isPlaying);
+    juce::String getSampleName() const;
     
 private:
     //==============================================================================
     const SampleDesc* sampleDesc = nullptr;
     juce::TextButton playButton;
+    std::function<bool(const juce::String&)> playCallback;
+    bool currentlyPlaying = false;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlayButtonComponent)
 };
@@ -46,6 +51,8 @@ public:
                                             juce::Component* existingComponentToUpdate) override;
     
     void setSampleDescs(std::vector<SampleDesc>* sampleDescs);
+    void setPlayCallback(std::function<bool(const juce::String&)> callback);
+    void updateButtonStates(const juce::String& currentlyPlayingSample);
     
     enum ColumnIds
     {
@@ -60,5 +67,6 @@ private:
     //==============================================================================
     std::vector<SampleDesc>* sampleDescs = nullptr;
     juce::OwnedArray<PlayButtonComponent> playButtonComponents;
+    std::function<bool(const juce::String&)> playCallback;
 };
 
