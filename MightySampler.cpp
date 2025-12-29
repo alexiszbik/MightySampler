@@ -92,10 +92,10 @@ void AudioCallback(const float *in, float *out, size_t size)
     }
 
     float lpFreq = hid.knobValues.at(2);
-    lpFreq = daisysp::mtof(lpFreq * 117 + 10);
+    lpFreq = daisysp::mtof(lpFreq * 125 + 10);
 
     float hpFreq = hid.knobValues.at(3);
-    hpFreq = daisysp::mtof(hpFreq * 117 + 10);
+    hpFreq = daisysp::mtof(hpFreq * 125 + 10);
 
     for (uint8_t chan = 0; chan < 2; chan ++) {
         lpFilter[chan].SetLowpass(lpFreq, 0.5);

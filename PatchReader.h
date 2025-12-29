@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Patch.h"
-#include "DaisyYMNK/DaisyYMNK.h"
+//#include "DaisyYMNK/DaisyYMNK.h"
 
 using namespace std;
 
@@ -19,7 +19,7 @@ public:
 
 private:
     Patch* patch;
-    DisplayManager *display = DisplayManager::GetInstance();
+    //DisplayManager *display = DisplayManager::GetInstance();
 
     SampleDesc* currentSampleDesc = nullptr;
     LayerData* currentLayerData = nullptr;
