@@ -4,6 +4,14 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="VvlYnD" name="PgmMaker">
     <GROUP id="{6591C6EC-7AB7-5C0D-E817-5D8E7B8D825C}" name="Source">
+      <FILE id="YCwP8p" name="LayerDataListModel.cpp" compile="1" resource="0"
+            file="Source/LayerDataListModel.cpp"/>
+      <FILE id="N7fzni" name="LayerDataListModel.h" compile="0" resource="0"
+            file="Source/LayerDataListModel.h"/>
+      <FILE id="r7zMLs" name="SampleDescListModel.cpp" compile="1" resource="0"
+            file="Source/SampleDescListModel.cpp"/>
+      <FILE id="zNP9N1" name="SampleDescListModel.h" compile="0" resource="0"
+            file="Source/SampleDescListModel.h"/>
       <FILE id="x4V2iI" name="SampleDescListBox.cpp" compile="1" resource="0"
             file="Source/SampleDescListBox.cpp"/>
       <FILE id="jAPwbB" name="SampleDescListBox.h" compile="0" resource="0"

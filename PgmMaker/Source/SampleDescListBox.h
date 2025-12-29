@@ -1,29 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../../PatchReader.h"
-
-//==============================================================================
-/*
-    Model class for displaying SampleDesc items in a ListBox
-*/
-class SampleDescListModel : public juce::ListBoxModel
-{
-public:
-    //==============================================================================
-    SampleDescListModel(std::vector<SampleDesc>* sampleDescs);
-    
-    //==============================================================================
-    int getNumRows() override;
-    void paintListBoxItem(int rowNumber, juce::Graphics& g, 
-                          int width, int height, bool rowIsSelected) override;
-    
-    void setSampleDescs(std::vector<SampleDesc>* sampleDescs);
-    
-private:
-    //==============================================================================
-    std::vector<SampleDesc>* sampleDescs;
-};
+#include "SampleDescListModel.h"
 
 //==============================================================================
 /*
