@@ -7,3 +7,6 @@
 [submodule "DaisyYMNK"]
 	path = DaisyYMNK
 	url = git@github.com:alexiszbik/DaisyYMNK.git
+[submodule "JUCE"]
+	path = JUCE
+	url = git@github.com:juce-framework/JUCE.git
