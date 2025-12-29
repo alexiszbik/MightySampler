@@ -42,6 +42,12 @@ public:
     /** Update sample descriptions with loaded audio data */
     void updateSampleDescs(std::vector<SampleDesc>* sampleDescs);
     
+    /** Export all loaded samples to WAV files in the specified directory */
+    bool exportAllSamples(const juce::String& outputDirectory);
+    
+    /** Get all loaded sample names */
+    std::vector<juce::String> getAllSampleNames() const;
+    
 private:
     //==============================================================================
     std::map<juce::String, std::unique_ptr<AudioFile<float>>> loadedSamples;

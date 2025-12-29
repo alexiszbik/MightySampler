@@ -27,6 +27,11 @@ MainComponent::MainComponent()
     
     addAndMakeVisible(tabbedComponent);
     
+    // Setup save button
+    saveAllSamplesButton.setButtonText("Save all samples...");
+    saveAllSamplesButton.addListener(this);
+    addAndMakeVisible(saveAllSamplesButton);
+    
     auto docsDir = juce::File::getSpecialLocation (juce::File::userDocumentsDirectory);
     auto samplerDir = docsDir.getChildFile ("sampler");
     
@@ -176,5 +181,49 @@ void MainComponent::resized()
     // update their positions.
     
     auto bounds = getLocalBounds();
+    
+    // Reserve space for the button at the bottom
+    auto buttonArea = bounds.removeFromBottom(40);
+    buttonArea.reduce(10, 5);
+    saveAllSamplesButton.setBounds(buttonArea);
+    
     tabbedComponent.setBounds(bounds);
+}
+
+void MainComponent::buttonClicked(juce::Button* button)
+{
+    if (button == &saveAllSamplesButton)
+    {
+        saveAllSamplesButtonClicked();
+    }
+}
+
+void MainComponent::saveAllSamplesButtonClicked()
+{
+    fileChooser = std::make_unique<juce::FileChooser>("Select folder to save samples...",
+                                                       juce::File::getSpecialLocation(juce::File::userDocumentsDirectory),
+                                                       "");
+    
+    auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories;
+    
+    fileChooser->launchAsync(folderChooserFlags, [this](const juce::FileChooser& chooser)
+    {
+        auto folder = chooser.getResult();
+        
+        if (folder.isDirectory() || folder.createDirectory())
+        {
+            if (sampleManager.exportAllSamples(folder.getFullPathName()))
+            {
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon,
+                                                      "Export Complete",
+                                                      "All samples have been exported successfully to:\n" + folder.getFullPathName());
+            }
+            else
+            {
+                juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+                                                      "Export Warning",
+                                                      "Some samples may have failed to export.\nCheck the console for details.");
+            }
+        }
+    });
 }

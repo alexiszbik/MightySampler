@@ -11,7 +11,8 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent
+class MainComponent  : public juce::AudioAppComponent,
+                       public juce::Button::Listener
 {
 public:
     //==============================================================================
@@ -26,6 +27,7 @@ public:
     //==============================================================================
     void paint (juce::Graphics& g) override;
     void resized() override;
+    void buttonClicked(juce::Button* button) override;
 
 private:
     //==============================================================================
@@ -37,8 +39,11 @@ private:
     SampleManager sampleManager;
     SamplePlayer samplePlayer;
     juce::String currentlyPlayingSample;
+    juce::TextButton saveAllSamplesButton;
+    std::unique_ptr<juce::FileChooser> fileChooser;
     
     bool onPlaySample(const juce::String& sampleName);
+    void saveAllSamplesButtonClicked();
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

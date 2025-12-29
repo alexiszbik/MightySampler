@@ -162,3 +162,64 @@ juce::String SampleManager::getFullPath(const juce::String& sampleName, const ju
     return juce::File(dirPath).getChildFile(sampleName).getFullPathName();
 }
 
+bool SampleManager::exportAllSamples(const juce::String& outputDirectory)
+{
+    juce::File outputDir(expandPath(outputDirectory));
+    
+    if (!outputDir.isDirectory())
+    {
+        if (!outputDir.createDirectory())
+        {
+            std::cout << "SampleManager: Failed to create output directory: " << outputDirectory << std::endl;
+            return false;
+        }
+    }
+    
+    bool allExported = true;
+    
+    for (const auto& pair : loadedSamples)
+    {
+        const juce::String& sampleName = pair.first;
+        AudioFile<float>* audioFile = pair.second.get();
+        
+        if (audioFile == nullptr)
+            continue;
+        
+        // Ensure the filename ends with .wav
+        juce::String fileName = sampleName;
+        if (!fileName.endsWithIgnoreCase(".wav"))
+        {
+            // Remove any existing extension and add .wav
+            int lastDot = fileName.lastIndexOfChar('.');
+            if (lastDot > 0)
+                fileName = fileName.substring(0, lastDot);
+            fileName += ".wav";
+        }
+        
+        juce::File outputFile = outputDir.getChildFile(fileName);
+        std::string filePath = outputFile.getFullPathName().toStdString();
+        
+        if (audioFile->save(filePath))
+        {
+            std::cout << "SampleManager: Exported " << fileName << std::endl;
+        }
+        else
+        {
+            std::cout << "SampleManager: Failed to export " << fileName << std::endl;
+            allExported = false;
+        }
+    }
+    
+    return allExported;
+}
+
+std::vector<juce::String> SampleManager::getAllSampleNames() const
+{
+    std::vector<juce::String> names;
+    for (const auto& pair : loadedSamples)
+    {
+        names.push_back(pair.first);
+    }
+    return names;
+}
+
