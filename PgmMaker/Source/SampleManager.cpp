@@ -199,9 +199,34 @@ bool SampleManager::exportAllSamples(const juce::String& outputDirectory)
         juce::File outputFile = outputDir.getChildFile(fileName);
         std::string filePath = outputFile.getFullPathName().toStdString();
         
-        if (audioFile->save(filePath))
+        // Create a 16-bit version of the audio file
+        AudioFile<int16_t> audioFile16Bit;
+        
+        // Copy audio buffer from float to int16_t
+        int numChannels = audioFile->getNumChannels();
+        int numSamples = audioFile->getNumSamplesPerChannel();
+        
+        audioFile16Bit.setNumChannels(numChannels);
+        audioFile16Bit.setNumSamplesPerChannel(numSamples);
+        audioFile16Bit.setSampleRate(audioFile->getSampleRate());
+        audioFile16Bit.setBitDepth(16);
+        
+        // Convert float samples to int16_t
+        for (int channel = 0; channel < numChannels; channel++)
         {
-            std::cout << "SampleManager: Exported " << fileName << std::endl;
+            for (int i = 0; i < numSamples; i++)
+            {
+                float sample = audioFile->samples[channel][i];
+                // Clamp to [-1.0, 1.0] range
+                sample = std::max(-1.0f, std::min(1.0f, sample));
+                // Convert to 16-bit integer
+                audioFile16Bit.samples[channel][i] = static_cast<int16_t>(sample * 32767.0f);
+            }
+        }
+        
+        if (audioFile16Bit.save(filePath))
+        {
+            std::cout << "SampleManager: Exported " << fileName << " (16-bit)" << std::endl;
         }
         else
         {
