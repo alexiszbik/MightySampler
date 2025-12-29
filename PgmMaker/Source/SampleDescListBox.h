@@ -5,7 +5,7 @@
 
 //==============================================================================
 /*
-    ListBox component wrapper for SampleDesc display
+    TableListBox component wrapper for SampleDesc display
 */
 class SampleDescListBox : public juce::Component
 {
@@ -20,8 +20,10 @@ public:
     
 private:
     //==============================================================================
-    juce::ListBox listBox;
+    juce::TableListBox tableListBox;
     SampleDescListModel model;
+    
+    void setupTable();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleDescListBox)
 };

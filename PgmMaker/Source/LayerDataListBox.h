@@ -5,7 +5,7 @@
 
 //==============================================================================
 /*
-    ListBox component wrapper for LayerData display
+    TableListBox component wrapper for LayerData display
 */
 class LayerDataListBox : public juce::Component
 {
@@ -14,14 +14,16 @@ public:
     LayerDataListBox();
     ~LayerDataListBox() override = default;
     
-    void setLayers(std::vector<LayerData>* layers);
+    void setData(std::vector<LayerData>* layers, std::vector<SampleDesc>* sampleDescs);
     void updateContent();
     void resized() override;
     
 private:
     //==============================================================================
-    juce::ListBox listBox;
+    juce::TableListBox tableListBox;
     LayerDataListModel model;
+    
+    void setupTable();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LayerDataListBox)
 };

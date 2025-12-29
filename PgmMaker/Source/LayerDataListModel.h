@@ -5,24 +5,37 @@
 
 //==============================================================================
 /*
-    Model class for displaying LayerData items in a ListBox
+    Model class for displaying LayerData items in a TableListBox
 */
-class LayerDataListModel : public juce::ListBoxModel
+class LayerDataListModel : public juce::TableListBoxModel
 {
 public:
     //==============================================================================
-    LayerDataListModel(std::vector<LayerData>* layers);
+    LayerDataListModel();
     
     //==============================================================================
     int getNumRows() override;
-    void paintListBoxItem(int rowNumber, juce::Graphics& g, 
-                          int width, int height, bool rowIsSelected) override;
+    void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
+    void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected,
+                                            juce::Component* existingComponentToUpdate) override;
     
     void setLayers(std::vector<LayerData>* layers);
+    void setSampleDescs(std::vector<SampleDesc>* sampleDescs);
+    
+    enum ColumnIds
+    {
+        LayerId = 1,
+        SampleId,
+        PlayMode,
+        Reverse,
+        Pitch
+    };
     
 private:
     //==============================================================================
-    std::vector<LayerData>* layers;
+    std::vector<LayerData>* layers = nullptr;
+    std::vector<SampleDesc>* sampleDescs = nullptr;
     
     juce::String getPlayModeString(EPlayMode mode);
 };

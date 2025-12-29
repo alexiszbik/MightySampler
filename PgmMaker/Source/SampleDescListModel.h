@@ -5,55 +5,60 @@
 
 //==============================================================================
 /*
-    Component for displaying a single SampleDesc row with play button
+    Component for the Play button in the SampleDesc table
 */
-class SampleDescRowComponent : public juce::Component,
-                                public juce::Button::Listener
+class PlayButtonComponent : public juce::Component,
+                            public juce::Button::Listener
 {
 public:
     //==============================================================================
-    SampleDescRowComponent();
-    ~SampleDescRowComponent() override = default;
+    PlayButtonComponent();
+    ~PlayButtonComponent() override = default;
     
-    void paint(juce::Graphics& g) override;
     void resized() override;
     void buttonClicked(juce::Button* button) override;
     
-    void setSampleDesc(const SampleDesc* sampleDesc, int rowNumber, bool isSelected);
+    void setSampleDesc(const SampleDesc* sampleDesc);
     
 private:
     //==============================================================================
     const SampleDesc* sampleDesc = nullptr;
-    int rowNumber = -1;
-    bool isSelected = false;
     juce::TextButton playButton;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleDescRowComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlayButtonComponent)
 };
 
 //==============================================================================
 /*
-    Model class for displaying SampleDesc items in a ListBox
+    Model class for displaying SampleDesc items in a TableListBox
 */
-class SampleDescListModel : public juce::ListBoxModel
+class SampleDescListModel : public juce::TableListBoxModel
 {
 public:
     //==============================================================================
-    SampleDescListModel(std::vector<SampleDesc>* sampleDescs);
+    SampleDescListModel();
     
     //==============================================================================
     int getNumRows() override;
-    void paintListBoxItem(int rowNumber, juce::Graphics& g, 
-                          int width, int height, bool rowIsSelected) override;
-    juce::Component* refreshComponentForRow(int rowNumber, bool isRowSelected,
-                                           juce::Component* existingComponentToUpdate) override;
-    int getRowHeight(int rowNumber);
+    void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
+    void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected,
+                                            juce::Component* existingComponentToUpdate) override;
     
     void setSampleDescs(std::vector<SampleDesc>* sampleDescs);
     
+    enum ColumnIds
+    {
+        Name = 1,
+        Size = 2,
+        Channels = 3,
+        SampleRate = 4,
+        Play = 5
+    };
+    
 private:
     //==============================================================================
-    std::vector<SampleDesc>* sampleDescs;
-    juce::OwnedArray<SampleDescRowComponent> components;
+    std::vector<SampleDesc>* sampleDescs = nullptr;
+    juce::OwnedArray<PlayButtonComponent> playButtonComponents;
 };
 

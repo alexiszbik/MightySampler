@@ -1,8 +1,7 @@
 #include "LayerDataListModel.h"
 
 //==============================================================================
-LayerDataListModel::LayerDataListModel(std::vector<LayerData>* layers)
-    : layers(layers)
+LayerDataListModel::LayerDataListModel()
 {
 }
 
@@ -14,42 +13,64 @@ int LayerDataListModel::getNumRows()
     return static_cast<int>(layers->size());
 }
 
-void LayerDataListModel::paintListBoxItem(int rowNumber, juce::Graphics& g, 
-                                           int width, int height, bool rowIsSelected)
+void LayerDataListModel::paintRowBackground(juce::Graphics& g, int rowNumber, 
+                                            int width, int height, bool rowIsSelected)
+{
+    if (rowIsSelected)
+        g.fillAll(juce::Colours::lightblue);
+    else
+        g.fillAll((rowNumber % 2 == 0) ? juce::Colours::white : juce::Colours::lightgrey);
+}
+
+void LayerDataListModel::paintCell(juce::Graphics& g, int rowNumber, int columnId,
+                                   int width, int height, bool rowIsSelected)
 {
     if (layers == nullptr || rowNumber < 0 || rowNumber >= static_cast<int>(layers->size()))
         return;
     
     const auto& layer = (*layers)[rowNumber];
-    
-    // Background color based on selection
-    if (rowIsSelected)
-        g.fillAll(juce::Colours::lightblue);
-    else
-        g.fillAll((rowNumber % 2 == 0) ? juce::Colours::white : juce::Colours::lightgrey);
-    
     g.setColour(juce::Colours::black);
     
-    // Draw layer information
-    auto area = juce::Rectangle<int>(5, 0, width - 10, height);
-    auto font = g.getCurrentFont();
+    juce::Rectangle<int> area(0, 0, width, height);
+    area.removeFromLeft(5);
     
-    // Sample ID
-    g.drawText("Sample ID: " + juce::String(layer.sampleId), 
-               area.removeFromTop(height / 2), 
-               juce::Justification::centredLeft);
-    
-    // Play Mode, Reverse, and Pitch
-    juce::String info = "Mode: " + getPlayModeString(layer.playMode);
-    info += " | Reverse: " + juce::String(layer.isReverse ? "Yes" : "No");
-    info += " | Pitch: " + juce::String(layer.pitch);
-    
-    g.drawText(info, area, juce::Justification::centredLeft);
+    switch (columnId)
+    {
+        case LayerId:
+            g.drawText(juce::String(rowNumber), area, juce::Justification::centredLeft);
+            break;
+        case SampleId: {
+            auto sampleStr = juce::String(sampleDescs->at(layer.sampleId).sampleName);
+            g.drawText(sampleStr, area, juce::Justification::centredLeft);
+        }
+            break;
+        case PlayMode:
+            g.drawText(getPlayModeString(layer.playMode), area, juce::Justification::centredLeft);
+            break;
+        case Reverse:
+            g.drawText(layer.isReverse ? "Yes" : "No", area, juce::Justification::centredLeft);
+            break;
+        case Pitch:
+            g.drawText(juce::String(layer.pitch), area, juce::Justification::centredLeft);
+            break;
+    }
 }
 
-void LayerDataListModel::setLayers(std::vector<LayerData>* newLayers)
+juce::Component* LayerDataListModel::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected,
+                                                              juce::Component* existingComponentToUpdate)
 {
+    // No custom components needed for LayerData
+    if (existingComponentToUpdate != nullptr)
+        delete existingComponentToUpdate;
+    return nullptr;
+}
+
+void LayerDataListModel::setLayers(std::vector<LayerData>* newLayers) {
     layers = newLayers;
+}
+
+void LayerDataListModel::setSampleDescs(std::vector<SampleDesc>* newSampleDescs) {
+    sampleDescs = newSampleDescs;
 }
 
 juce::String LayerDataListModel::getPlayModeString(EPlayMode mode)

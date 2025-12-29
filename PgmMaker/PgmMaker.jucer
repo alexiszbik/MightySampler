@@ -4,6 +4,10 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="VvlYnD" name="PgmMaker">
     <GROUP id="{6591C6EC-7AB7-5C0D-E817-5D8E7B8D825C}" name="Source">
+      <FILE id="u4rQE8" name="LayerDataListBox.cpp" compile="1" resource="0"
+            file="Source/LayerDataListBox.cpp"/>
+      <FILE id="dZW62D" name="LayerDataListBox.h" compile="0" resource="0"
+            file="Source/LayerDataListBox.h"/>
       <FILE id="YCwP8p" name="LayerDataListModel.cpp" compile="1" resource="0"
             file="Source/LayerDataListModel.cpp"/>
       <FILE id="N7fzni" name="LayerDataListModel.h" compile="0" resource="0"
@@ -16,10 +20,6 @@
             file="Source/SampleDescListBox.cpp"/>
       <FILE id="jAPwbB" name="SampleDescListBox.h" compile="0" resource="0"
             file="Source/SampleDescListBox.h"/>
-      <FILE id="u4rQE8" name="LayerDataListBox.cpp" compile="1" resource="0"
-            file="Source/LayerDataListBox.cpp"/>
-      <FILE id="dZW62D" name="LayerDataListBox.h" compile="0" resource="0"
-            file="Source/LayerDataListBox.h"/>
       <FILE id="SyGK3g" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="tim54z" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="JnMHKB" name="MainComponent.cpp" compile="1" resource="0"

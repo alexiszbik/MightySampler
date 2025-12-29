@@ -10,3 +10,6 @@
 [submodule "JUCE"]
 	path = JUCE
 	url = git@github.com:juce-framework/JUCE.git
+[submodule "PgmMaker/AudioFile"]
+	path = PgmMaker/AudioFile
+	url = git@github.com:adamstark/AudioFile.git

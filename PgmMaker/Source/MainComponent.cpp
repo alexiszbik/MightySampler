@@ -44,7 +44,7 @@ MainComponent::MainComponent()
             }
             
             // Update the list boxes with the loaded data
-            layerDataListBox.setLayers(&patchReader.layers);
+            layerDataListBox.setData(&patchReader.layers, &patchReader.sampleDescs);
             sampleDescListBox.setSampleDescs(&patchReader.sampleDescs);
         }
 
