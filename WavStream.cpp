@@ -206,16 +206,22 @@ int WavStream::Open(size_t sel)
 
         UINT bytesread = 0;
         size_t fileSize = 0;
+        UINT samplesLeft = sample_ct * header.chan_ct * bytes_per_chan;
 
-        while(f_eof(&SDFile) == 0) {
-            UINT sizeToRead = 128;
-            f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
+        while(/*f_eof(&SDFile*/ samplesLeft > 0) {
+            UINT sizeToRead = samplesLeft > 512 ? 512 : samplesLeft;
+            FRESULT res = f_read(&SDFile, &bigBuff[fileSize + readHead], sizeToRead, &bytesread);
+
+            if (res != FR_OK || bytesread == 0) {
+                break;
+            }
+
             fileSize += bytesread / bytes_per_chan;
+            samplesLeft -= bytesread;
         }
 
         desc->sampleData.data = &bigBuff[readHead];
-
-        readHead += fileSize;
+        readHead += (sample_ct * header.chan_ct);
     }
 
     f_close(&SDFile);

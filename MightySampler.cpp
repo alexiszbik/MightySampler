@@ -114,7 +114,7 @@ void AudioCallback(const float *in, float *out, size_t size)
 
 void HandleMidiMessage(MidiEvent m)
 {
-    if (m.channel != (8 - 1)) {
+    if (m.channel != (7 - 1)) {
         return;
     }
 
@@ -193,6 +193,7 @@ int main(void)
 
     SdmmcHandler::Config sd_cfg;
     sd_cfg.Defaults();
+    //sd_cfg.speed = SdmmcHandler::Speed::FAST;
     sd_cfg.speed = SdmmcHandler::Speed::FAST;
     sd_cfg.width = SdmmcHandler::BusWidth::BITS_4;
     sdcard.Init(sd_cfg);
